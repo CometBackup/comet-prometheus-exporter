@@ -4,7 +4,7 @@
 
 This is a sample PHP script that serves a Prometheus-compatible `/metrics/` endpoint. It pulls information from a Comet Server on-demand.
 
-## Usage:
+## Usage
 
 ```bash
 # Build Docker image
