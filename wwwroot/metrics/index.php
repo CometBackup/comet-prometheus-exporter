@@ -4,13 +4,18 @@
 // Copyright (2019) Comet Backup.com Ltd
 // License: MIT
 
-require 'comet_request.php';
+require '../vendor/autoload.php';
 
+$cs = new \Comet\Server(
+    getenv('COMET_SERVER_URL'),
+    getenv('COMET_ADMIN_USER'),
+    getenv('COMET_ADMIN_PASS')
+);
 
 // Load some basic information using the Comet Server API
 // @ref https://cometbackup.com/docs/api-reference#adminlistusers-list-all-user-accounts
 
-$users = json_decode(comet_request('api/v1/admin/list-users'), true);
+$users = $cs->AdminListUsers();
 $total_users = count($users);
 
 
