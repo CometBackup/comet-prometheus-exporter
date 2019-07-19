@@ -1,0 +1,5 @@
+{
+    "require": {
+        "cometbackup/comet-php-sdk": "^2.6"
+    }
+}
