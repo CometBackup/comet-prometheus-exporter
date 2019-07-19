@@ -49,7 +49,7 @@ foreach($recentjobs as $job) {
 }
 
 
-// Display the results in Promethus text exposition format
+// Display the results in Prometheus text exposition format
 // @ref https://prometheus.io/docs/instrumenting/exposition_formats/ 
 
 header('Content-Type: text/plain; version=0.0.4');
