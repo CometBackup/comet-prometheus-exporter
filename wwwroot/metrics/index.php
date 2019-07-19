@@ -12,18 +12,61 @@ $cs = new \Comet\Server(
     getenv('COMET_ADMIN_PASS')
 );
 
+
 // Load some basic information using the Comet Server API
-// @ref https://cometbackup.com/docs/api-reference#adminlistusers-list-all-user-accounts
 
 $users = $cs->AdminListUsers();
-$total_users = count($users);
+
+$online_devices = $cs->AdminDispatcherListActive();
+
+$recentjobs = $cs->AdminGetJobsForDateRange(time() - 86400, time()); // Jobs from the last 24 hours
+
+
+// Categorise recent job counts, to report on them separately as well as in aggregate
+
+$recentjobs_success_ct = 0;
+$recentjobs_running_ct = 0;
+$recentjobs_warning_ct = 0;
+$recentjobs_quota_ct   = 0;
+$recentjobs_failure_ct = 0;
+foreach($recentjobs as $job) {
+    if ($job->Status >= \Comet\Def::JOB_STATUS_STOP_SUCCESS__MIN && $job->Status <= \Comet\Def::JOB_STATUS_STOP_SUCCESS__MAX) {
+        $recentjobs_success_ct++;
+
+    } else if ($job->Status >= \Comet\Def::JOB_STATUS_RUNNING__MIN && $job->Status <= \Comet\Def::JOB_STATUS_RUNNING__MAX) {
+        $recentjobs_running_ct++;
+
+    } else if ($job->Status == \Comet\Def::JOB_STATUS_FAILED_WARNING) {
+        $recentjobs_warning_ct++;
+
+    } else if ($job->Status == \Comet\Def::JOB_STATUS_FAILED_QUOTA) {
+        $recentjobs_quota_ct++;
+
+    } else {
+        $recentjobs_failure_ct++;
+
+    }
+}
 
 
 // Display the results in Promethus text exposition format
 // @ref https://prometheus.io/docs/instrumenting/exposition_formats/ 
 
 header('Content-Type: text/plain; version=0.0.4');
+?>
+# HELP cometserver_total_users Total number of users on this Comet Server
+# TYPE cometserver_total_users gauge
+cometserver_total_users <?=count($users)?> 
 
-echo "# HELP cometserver_total_users Total number of users on this Comet Server\n";
-echo "# TYPE cometserver_total_users gauge\n";
-echo "cometserver_total_users {$total_users}\n";
+# HELP cometserver_online_devices Total number of online devices
+# TYPE cometserver_online_devices gauge
+cometserver_online_devices <?=count($online_devices)?> 
+
+# HELP cometserver_recentjobs Total number of jobs in the last 24 hours
+# TYPE cometserver_recentjobs gauge
+cometserver_recentjobs{status="success"} <?=$recentjobs_success_ct?> 
+cometserver_recentjobs{status="running"} <?=$recentjobs_running_ct?> 
+cometserver_recentjobs{status="warning"} <?=$recentjobs_warning_ct?> 
+cometserver_recentjobs{status="quota_exceeded"} <?=$recentjobs_quota_ct?> 
+cometserver_recentjobs{status="error"} <?=$recentjobs_failure_ct?> 
+cometserver_recentjobs_total <?=count($recentjobs)?> 
