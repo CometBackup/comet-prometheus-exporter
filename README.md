@@ -13,6 +13,8 @@ This exporter produces the following metrics:
 |Name|Type|Description
 |---|---|---
 |`cometserver_total_users`|Gauge|Total number of users on this Comet Server
+|`cometserver_online_devices`|Gauge|Total number of online devices
+|`cometserver_recentjobs{status=...}`<br>`cometserver_recentjobs_total`|Gauge|Total number of jobs in the last 24 hours
 
 ## Installing
 
