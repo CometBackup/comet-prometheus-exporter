@@ -4,6 +4,8 @@
 
 This is a sample PHP script that serves a Prometheus-compatible `/metrics/` endpoint. It pulls information from a Comet Server on-demand.
 
+[![](doc/screenshot.thumb.jpg)](doc/screenshot.png)
+
 This exporter is made available under the terms of the MIT license. You are free to use and modify this script for any purpose as long as you retain the copyright notice in the `LICENSE` file and/or elsewhere in this repository.
 
 ## Metrics
