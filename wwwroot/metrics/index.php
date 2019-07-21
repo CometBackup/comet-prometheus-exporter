@@ -69,4 +69,3 @@ cometserver_recentjobs{status="running"} <?=$recentjobs_running_ct?>
 cometserver_recentjobs{status="warning"} <?=$recentjobs_warning_ct?> 
 cometserver_recentjobs{status="quota_exceeded"} <?=$recentjobs_quota_ct?> 
 cometserver_recentjobs{status="error"} <?=$recentjobs_failure_ct?> 
-cometserver_recentjobs_total <?=count($recentjobs)?> 
