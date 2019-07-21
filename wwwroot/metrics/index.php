@@ -15,11 +15,20 @@ $cs = new \Comet\Server(
 
 // Load some basic information using the Comet Server API
 
-$users = $cs->AdminListUsers();
+$users = $cs->AdminListUsersFull();
 
 $online_devices = $cs->AdminDispatcherListActive();
 
 $recentjobs = $cs->AdminGetJobsForDateRange(time() - 86400, time()); // Jobs from the last 24 hours
+
+
+// Build inverted index of online devices for traversal
+
+$device_is_online_lookup = [];
+foreach($online_devices as $live_connection) {
+    $key = $live_connection->Username . "\x00" . $live_connection->DeviceID;
+    $device_is_online_lookup[$key] = true;
+}
 
 
 // Categorise recent job counts, to report on them separately as well as in aggregate
@@ -69,3 +78,22 @@ cometserver_recentjobs{status="running"} <?=$recentjobs_running_ct?>
 cometserver_recentjobs{status="warning"} <?=$recentjobs_warning_ct?> 
 cometserver_recentjobs{status="quota_exceeded"} <?=$recentjobs_quota_ct?> 
 cometserver_recentjobs{status="error"} <?=$recentjobs_failure_ct?> 
+
+# HELP cometserver_device The online/offline status of each registered device
+# TYPE cometserver_device gauge
+<?php
+    foreach($users as $username => $user) {
+        foreach($user->Devices as $device_id => $device) {
+            echo 'cometserver_device{'.
+                'username=' . json_encode($username) . ', '.
+                'device_id=' . json_encode($device_id) . ', '.
+                'device_friendly_name=' . json_encode($device->FriendlyName) .
+            '}=' . (
+                array_key_exists($username . "\x00" . $device_id, $device_is_online_lookup)
+                    ? '1'
+                    : '0'
+            ).
+            "\n";
+        }
+    }
+?> 
