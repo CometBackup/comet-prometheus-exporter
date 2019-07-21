@@ -4,7 +4,7 @@
 // Copyright (2019) Comet Backup.com Ltd
 // License: MIT
 
-require '../vendor/autoload.php';
+require '../../vendor/autoload.php';
 
 $cs = new \Comet\Server(
     getenv('COMET_SERVER_URL'),
