@@ -67,10 +67,6 @@ header('Content-Type: text/plain; version=0.0.4');
 # TYPE cometserver_total_users gauge
 cometserver_total_users <?=count($users)?> 
 
-# HELP cometserver_online_devices Total number of online devices
-# TYPE cometserver_online_devices gauge
-cometserver_online_devices <?=count($online_devices)?> 
-
 # HELP cometserver_recentjobs Total number of jobs in the last 24 hours
 # TYPE cometserver_recentjobs gauge
 cometserver_recentjobs{status="success"} <?=$recentjobs_success_ct?> 
