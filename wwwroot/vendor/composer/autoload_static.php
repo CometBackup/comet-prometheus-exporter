@@ -53,11 +53,22 @@ class ComposerStaticInitebee2e5d0aee1691d257e0cf5f926d9d
         ),
     );
 
+    public static $prefixesPsr0 = array (
+        'P' => 
+        array (
+            'Prometheus\\' => 
+            array (
+                0 => __DIR__ . '/..' . '/jimdo/prometheus_client_php/src',
+            ),
+        ),
+    );
+
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInitebee2e5d0aee1691d257e0cf5f926d9d::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInitebee2e5d0aee1691d257e0cf5f926d9d::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitebee2e5d0aee1691d257e0cf5f926d9d::$prefixesPsr0;
 
         }, null, ClassLoader::class);
     }

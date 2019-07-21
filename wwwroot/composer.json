@@ -1,5 +1,7 @@
 {
     "require": {
-        "cometbackup/comet-php-sdk": "^2.6"
+        "cometbackup/comet-php-sdk": "^2.6",
+        "ext-curl": "^7.3",
+        "jimdo/prometheus_client_php": "^0.9.1"
     }
 }
