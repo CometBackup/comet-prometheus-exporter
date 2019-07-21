@@ -21,7 +21,7 @@ $users = $cs->AdminListUsersFull();
 
 $online_devices = $cs->AdminDispatcherListActive();
 
-$recentjobs = $cs->AdminGetJobsForDateRange(time() - 86400, time()); // Jobs from the last 24 hours
+$recentjobs = $cs->AdminGetJobsForDateRange(time() - 86400, time()); // Jobs with a runtime intersecting the last 24 hours
 
 
 // Metric
