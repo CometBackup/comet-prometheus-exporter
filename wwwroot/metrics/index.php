@@ -27,14 +27,14 @@ $recentjobs = $cs->AdminGetJobsForDateRange(time() - 86400, time()); // Jobs wit
 // Metric
 // Total number of users on the server
 
-$gauge = $registry->getOrRegisterGauge('cometserver', 'total_users', 'The total number of users on this Comet Server', []);
+$gauge = $registry->getOrRegisterGauge('cometserver', 'users_total', 'The total number of users on this Comet Server', []);
 $gauge->set(count($users), []);
 
 
 // Metric
 // Categorise recent job counts, to report on them separately as well as in aggregate
 
-$recentjobs_gauge = $registry->getOrRegisterGauge("cometserver", "recentjobs", "Total number of jobs in the last 24 hours", ['status']);
+$recentjobs_gauge = $registry->getOrRegisterGauge("cometserver", "recentjobs_total", "Total number of jobs in the last 24 hours", ['status']);
 
 $recentjobs_gauge->set(0, ['success']);
 $recentjobs_gauge->set(0, ['running']);
