@@ -15,7 +15,7 @@ This exporter produces the following metrics:
 |Name|Type|Description
 |---|---|---
 |`cometserver_users_total`|Gauge|Total number of users on this Comet Server
-|`cometserver_device_is_online{username=,device_id=,device_friendly_name=}=0|1`|Gauge|For every registered device, 0/1 for offline/online
+|`cometserver_device_is_online{username=,device_id=,device_friendly_name=}=0/1`|Gauge|For every registered device, 0/1 for offline/online
 |`cometserver_recentjobs_total{status=...}`|Gauge|Total number of jobs in the last 24 hours
 
 ## Installing
