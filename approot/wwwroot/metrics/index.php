@@ -38,14 +38,14 @@ $api_duration_gauge->set(($api_requests_end_time - $api_requests_start_time) * 1
 // Metric
 // Total number of users on the server
 
-$gauge = $registry->getOrRegisterGauge('cometserver', 'users_total', 'The total number of users on this Comet Server', []);
-$gauge->set(count($users), []);
+$users_total_gauge = $registry->registerGauge('cometserver', 'users_total', 'The total number of users on this Comet Server', []);
+$users_total_gauge->set(count($users), []);
 
 
 // Metric
 // Categorise recent job counts, to report on them separately as well as in aggregate
 
-$recentjobs_gauge = $registry->getOrRegisterGauge("cometserver", "recentjobs_total", "Total number of jobs in the last 24 hours", ['status']);
+$recentjobs_gauge = $registry->registerGauge("cometserver", "recentjobs_total", "Total number of jobs in the last 24 hours", ['status']);
 
 $recentjobs_gauge->set(0, ['success']);
 $recentjobs_gauge->set(0, ['running']);
@@ -76,7 +76,7 @@ foreach($recentjobs as $job) {
 // Metric
 // Online/offline status of each device
 
-$deviceGauge = $registry->getOrRegisterGauge('cometserver', 'device_is_online', "The online/offline status of each registered device", ['username', 'device_id', 'device_friendly_name']);
+$device_is_online_gauge = $registry->getOrRegisterGauge('cometserver', 'device_is_online', "The online/offline status of each registered device", ['username', 'device_id', 'device_friendly_name']);
 
 $device_is_online_lookup = []; // Build inverted index of online devices for traversal
 foreach($online_devices as $live_connection) {
@@ -87,7 +87,7 @@ foreach($online_devices as $live_connection) {
 foreach($users as $username => $user) {
     foreach($user->Devices as $device_id => $device) {
         $is_online = array_key_exists($username . "\x00" . $device_id, $device_is_online_lookup);
-        $deviceGauge->set($is_online ? 1 : 0, [$username, $device_id, $device->FriendlyName]);
+        $device_is_online_gauge->set($is_online ? 1 : 0, [$username, $device_id, $device->FriendlyName]);
     }
 }
 
