@@ -17,11 +17,22 @@ $registry = new \Prometheus\CollectorRegistry(new \Prometheus\Storage\InMemory()
 
 // Load some basic information using the Comet Server API
 
+$api_requests_start_time = microtime(true);
+
 $users = $cs->AdminListUsersFull();
 
 $online_devices = $cs->AdminDispatcherListActive();
 
 $recentjobs = $cs->AdminGetJobsForDateRange(time() - 86400, time()); // Jobs with a runtime intersecting the last 24 hours
+
+$api_requests_end_time = microtime(true);
+
+
+// Metric
+// Time taken to request API data from the Comet Server
+
+$api_duration_gauge = $registry->registerGauge('cometserver', 'api_lookup_duration', "The time required to retrieve data from the Comet Server (ms)");
+$api_duration_gauge->set(($api_requests_end_time - $api_requests_start_time) * 1000, []);
 
 
 // Metric
