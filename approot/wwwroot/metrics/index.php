@@ -19,6 +19,8 @@ $registry = new \Prometheus\CollectorRegistry(new \Prometheus\Storage\InMemory()
 
 $api_requests_start_time = microtime(true);
 
+$serverinfo = $cs->AdminMetaVersion();
+
 $users = $cs->AdminListUsersFull();
 
 $online_devices = $cs->AdminDispatcherListActive();
@@ -89,6 +91,19 @@ foreach($users as $username => $user) {
         $is_online = array_key_exists($username . "\x00" . $device_id, $device_is_online_lookup);
         $device_is_online_gauge->set($is_online ? 1 : 0, [$username, $device_id, $device->FriendlyName]);
     }
+}
+
+
+// Metric
+// Up-to-date status of each device
+
+$device_is_current_gauge = $registry->registerGauge('cometserver', 'device_is_current', "Whether each online device is running the current software version (" . $serverinfo->Version . ")", ['username', 'device_id']);
+
+foreach($online_devices as $live_connection) {
+    $device_is_current_gauge->set(
+        ($live_connection->ReportedVersion == $serverinfo->Version) ? 1 : 0,
+        [$live_connection->Username, $live_connection->DeviceID]
+    );
 }
 
 
