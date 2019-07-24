@@ -33,15 +33,23 @@ $api_requests_end_time = microtime(true);
 // Metric
 // Time taken to request API data from the Comet Server
 
-$api_duration_gauge = $registry->registerGauge('cometserver', 'api_lookup_duration', "The time required to retrieve data from the Comet Server (ms)");
-$api_duration_gauge->set(($api_requests_end_time - $api_requests_start_time) * 1000, []);
+$api_duration_gauge = $registry->registerGauge(
+    'cometserver',
+    'api_lookup_duration',
+    "The time required to retrieve data from the Comet Server (ms)"
+);
+$api_duration_gauge->set(($api_requests_end_time - $api_requests_start_time) * 1000);
 
 
 // Metric
 // Total number of users on the server
 
-$users_total_gauge = $registry->registerGauge('cometserver', 'users_total', 'The total number of users on this Comet Server', []);
-$users_total_gauge->set(count($users), []);
+$users_total_gauge = $registry->registerGauge(
+    'cometserver',
+    'users_total',
+    'The total number of users on this Comet Server'
+);
+$users_total_gauge->set(count($users));
 
 
 // Metric
@@ -70,7 +78,12 @@ foreach($users as $user) {
 // Metric
 // Categorise recent job counts, to report on them separately as well as in aggregate
 
-$recentjobs_gauge = $registry->registerGauge("cometserver", "recentjobs_total", "Total number of jobs in the last 24 hours", ['status']);
+$recentjobs_gauge = $registry->registerGauge(
+    "cometserver",
+    "recentjobs_total",
+    "Total number of jobs in the last 24 hours",
+    ['status']
+);
 
 $recentjobs_gauge->set(0, ['success']);
 $recentjobs_gauge->set(0, ['running']);
@@ -101,7 +114,12 @@ foreach($recentjobs as $job) {
 // Metric
 // Online/offline status of each device
 
-$device_is_online_gauge = $registry->getOrRegisterGauge('cometserver', 'device_is_online', "The online/offline status of each registered device", ['username', 'device_id']);
+$device_is_online_gauge = $registry->getOrRegisterGauge(
+    'cometserver',
+    'device_is_online',
+    "The online/offline status of each registered device",
+    ['username', 'device_id']
+);
 
 $device_is_online_lookup = []; // Build inverted index of online devices for traversal
 foreach($online_devices as $live_connection) {
@@ -120,7 +138,12 @@ foreach($users as $username => $user) {
 // Metric
 // Up-to-date status of each device
 
-$device_is_current_gauge = $registry->registerGauge('cometserver', 'device_is_current', "Whether each online device is running the current software version (" . $serverinfo->Version . ")", ['username', 'device_id']);
+$device_is_current_gauge = $registry->registerGauge(
+    'cometserver',
+    'device_is_current',
+    "Whether each online device is running the current software version (" . $serverinfo->Version . ")",
+    ['username', 'device_id']
+);
 
 foreach($online_devices as $live_connection) {
     $device_is_current_gauge->set(
