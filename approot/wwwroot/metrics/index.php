@@ -78,7 +78,7 @@ foreach($recentjobs as $job) {
 // Metric
 // Online/offline status of each device
 
-$device_is_online_gauge = $registry->getOrRegisterGauge('cometserver', 'device_is_online', "The online/offline status of each registered device", ['username', 'device_id', 'device_friendly_name']);
+$device_is_online_gauge = $registry->getOrRegisterGauge('cometserver', 'device_is_online', "The online/offline status of each registered device", ['username', 'device_id']);
 
 $device_is_online_lookup = []; // Build inverted index of online devices for traversal
 foreach($online_devices as $live_connection) {
@@ -89,7 +89,7 @@ foreach($online_devices as $live_connection) {
 foreach($users as $username => $user) {
     foreach($user->Devices as $device_id => $device) {
         $is_online = array_key_exists($username . "\x00" . $device_id, $device_is_online_lookup);
-        $device_is_online_gauge->set($is_online ? 1 : 0, [$username, $device_id, $device->FriendlyName]);
+        $device_is_online_gauge->set($is_online ? 1 : 0, [$username, $device_id]);
     }
 }
 
