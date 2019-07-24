@@ -80,7 +80,7 @@ foreach($users as $user) {
 
 $vault_size_gauge = $registry->registerGauge(
     'cometserver',
-    'storagevault_size_quota',
+    'storagevault_quota_bytes',
     'The quota limit for each Storage Vault, if one is set',
     ['username', 'vault_id', 'vault_type']
 );

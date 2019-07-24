@@ -25,7 +25,7 @@ This exporter produces the following metrics:
 |`cometserver_lastbackup_upload_size_bytes{username,protected_item_id}`|Gauge|The size (bytes) uploaded during most recent completed backup job for this Protected Item
 |`cometserver_recentjobs_total{status}`|Gauge|Total number of jobs in the last 24 hours
 |`cometserver_storagevault_size_bytes{username,vault_id,vault_type}`|Gauge|The last measured size (in bytes) of each Storage Vault
-|`cometserver_storagevault_size_quota{username,vault_id,vault_type}`|Gauge|The quota limit for each Storage Vault, if one is set
+|`cometserver_storagevault_quota_bytes{username,vault_id,vault_type}`|Gauge|The quota limit for each Storage Vault, if one is set
 |`cometserver_users_total`|Gauge|Total number of users on this Comet Server
 
 ## Installing
