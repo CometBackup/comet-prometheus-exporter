@@ -101,6 +101,60 @@ foreach($users as $user) {
 
 
 // Metric
+// Last completed backup job for each Protected Item
+
+$lastbackup_start_time = $registry->registerGauge(
+    'cometserver',
+    'lastbackup_start_time',
+    'The start time of the most recent completed backup job for this Protected Item',
+    ['username', 'protected_item_id']
+);
+$lastbackup_end_time = $registry->registerGauge(
+    'cometserver',
+    'lastbackup_end_time',
+    'The end time of the most recent completed backup job for this Protected Item',
+    ['username', 'protected_item_id']
+);
+$lastbackup_file_count = $registry->registerGauge(
+    'cometserver',
+    'lastbackup_file_count',
+    'The number of files in the most recent completed backup job for this Protected Item',
+    ['username', 'protected_item_id']
+);
+$lastbackup_file_size = $registry->registerGauge(
+    'cometserver',
+    'lastbackup_file_size_bytes',
+    'The size (bytes) of the data selected for backup on disk, as of the most recent completed backup job for this Protected Item',
+    ['username', 'protected_item_id']
+);
+$lastbackup_upload_size = $registry->registerGauge(
+    'cometserver',
+    'lastbackup_upload_size_bytes',
+    'The size (bytes) uploaded during most recent completed backup job for this Protected Item',
+    ['username', 'protected_item_id']
+);
+$lastbackup_download_size = $registry->registerGauge(
+    'cometserver',
+    'lastbackup_download_size_bytes',
+    'The size (bytes) downloaded during most recent completed backup job for this Protected Item',
+    ['username', 'protected_item_id']
+);
+foreach($users as $user) {
+    foreach($user->Sources as $protected_item_id => $protected_item) {
+        $labels = [$user->Username, $protected_item_id];
+        if ($protected_item->Statistics->LastBackupJob->StartTime > 0) {
+            $lastbackup_start_time->set($protected_item->Statistics->LastBackupJob->StartTime, $labels);
+            $lastbackup_end_time->set($protected_item->Statistics->LastBackupJob->EndTime, $labels);
+            $lastbackup_file_count->set($protected_item->Statistics->LastBackupJob->TotalFiles, $labels);
+            $lastbackup_file_size->set($protected_item->Statistics->LastBackupJob->TotalSize, $labels);
+            $lastbackup_upload_size->set($protected_item->Statistics->LastBackupJob->UploadSize, $labels);
+            $lastbackup_download_size->set($protected_item->Statistics->LastBackupJob->DownloadSize, $labels);
+        }
+    }
+}
+
+
+// Metric
 // Categorise recent job counts, to report on them separately as well as in aggregate
 
 $recentjobs_gauge = $registry->registerGauge(
