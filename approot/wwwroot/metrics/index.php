@@ -76,6 +76,31 @@ foreach($users as $user) {
 
 
 // Metric
+// Storage Vault quota enforcement
+
+$vault_size_gauge = $registry->registerGauge(
+    'cometserver',
+    'storagevault_size_quota',
+    'The quota limit for each Storage Vault, if one is set',
+    ['username', 'vault_id', 'vault_type']
+);
+foreach($users as $user) {
+    foreach($user->Destinations as $storage_vault_id => $storage_vault) {
+        if ($storage_vault->StorageLimitEnabled) {
+            $vault_size_gauge->set(
+                $storage_vault->StorageLimitBytes,
+                [
+                    $user->Username,
+                    $storage_vault_id,
+                    $storage_vault->DestinationType,
+                ]
+            );
+        }
+    }
+}
+
+
+// Metric
 // Categorise recent job counts, to report on them separately as well as in aggregate
 
 $recentjobs_gauge = $registry->registerGauge(
