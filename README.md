@@ -14,9 +14,12 @@ This exporter produces the following metrics:
 
 |Name|Type|Description
 |---|---|---
+|`cometserver_api_lookup_duration`|Gauge|The time required to retrieve data from the Comet Server (ms)
+|`cometserver_device_is_current{username,device_id}`|Gauge|Whether each online device is running the current software version (19.6.6)
+|`cometserver_device_is_online{username,device_id}`|Gauge|The online/offline status of each registered device
+|`cometserver_recentjobs_total{status}`|Gauge|Total number of jobs in the last 24 hours
+|`cometserver_storagevault_size_bytes{username,vault_id,vault_type}`|Gauge|The last measured size (in bytes) of each Storage Vault
 |`cometserver_users_total`|Gauge|Total number of users on this Comet Server
-|`cometserver_device_is_online{username=,device_id=,device_friendly_name=}=0/1`|Gauge|For every registered device, 0/1 for offline/online
-|`cometserver_recentjobs_total{status=...}`|Gauge|Total number of jobs in the last 24 hours
 
 ## Installing
 
