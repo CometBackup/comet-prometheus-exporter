@@ -45,6 +45,29 @@ $users_total_gauge->set(count($users), []);
 
 
 // Metric
+// Storage Vault current sizes for each user
+
+$vault_size_gauge = $registry->registerGauge(
+    'cometserver',
+    'storagevault_size_bytes',
+    'The last measured size (in bytes) of each Storage Vault',
+    ['username', 'vault_id', 'vault_type']
+);
+foreach($users as $user) {
+    foreach($user->Destinations as $storage_vault_id => $storage_vault) {
+        $vault_size_gauge->set(
+            $storage_vault->Statistics->ClientProvidedSize->Size,
+            [
+                $user->Username,
+                $storage_vault_id,
+                $storage_vault->DestinationType,
+            ]
+        );
+    }
+}
+
+
+// Metric
 // Categorise recent job counts, to report on them separately as well as in aggregate
 
 $recentjobs_gauge = $registry->registerGauge("cometserver", "recentjobs_total", "Total number of jobs in the last 24 hours", ['status']);
