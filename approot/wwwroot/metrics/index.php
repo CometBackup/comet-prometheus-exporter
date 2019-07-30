@@ -139,6 +139,12 @@ $lastbackup_download_size = $registry->registerGauge(
     'The size (bytes) downloaded during most recent completed backup job for this Protected Item',
     ['username', 'protected_item_id']
 );
+$lastbackup_status = $registry->registerGauge(
+    'cometserver',
+    'lastbackup_status',
+    'The status of the most recent completed backup job for this Protected Item.',
+    ['username', 'protected_item_id', 'status']
+);
 foreach($users as $user) {
     foreach($user->Sources as $protected_item_id => $protected_item) {
         $labels = [$user->Username, $protected_item_id];
@@ -149,6 +155,8 @@ foreach($users as $user) {
             $lastbackup_file_size->set($protected_item->Statistics->LastBackupJob->TotalSize, $labels);
             $lastbackup_upload_size->set($protected_item->Statistics->LastBackupJob->UploadSize, $labels);
             $lastbackup_download_size->set($protected_item->Statistics->LastBackupJob->DownloadSize, $labels);
+
+            $lastbackup_status->set(1, [$user->Username, $protected_item_id, categorise_job_status($protected_item->Statistics->LastBackupJob)]);
         }
     }
 }
