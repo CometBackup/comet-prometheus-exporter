@@ -170,23 +170,27 @@ $recentjobs_gauge->set(0, ['warning']);
 $recentjobs_gauge->set(0, ['quota_exceeded']);
 $recentjobs_gauge->set(0, ['error']);
 
-foreach($recentjobs as $job) {
+function categorise_job_status(\Comet\BackupJobDetail $job) {
     if ($job->Status >= \Comet\Def::JOB_STATUS_STOP_SUCCESS__MIN && $job->Status <= \Comet\Def::JOB_STATUS_STOP_SUCCESS__MAX) {
-        $recentjobs_gauge->inc(['success']);
+        return 'success';
 
     } else if ($job->Status >= \Comet\Def::JOB_STATUS_RUNNING__MIN && $job->Status <= \Comet\Def::JOB_STATUS_RUNNING__MAX) {
-        $recentjobs_gauge->inc(['running']);
+        return 'running';
 
     } else if ($job->Status == \Comet\Def::JOB_STATUS_FAILED_WARNING) {
-        $recentjobs_gauge->inc(['warning']);
+        return 'warning';
 
     } else if ($job->Status == \Comet\Def::JOB_STATUS_FAILED_QUOTA) {
-        $recentjobs_gauge->inc(['quota_exceeded']);
+        return 'quota_exceeded';
 
     } else {
-        $recentjobs_gauge->inc(['error']);
+        return 'error';
 
     }
+}
+
+foreach($recentjobs as $job) {
+    $recentjobs_gauge->inc([ categorise_job_status($job) ]);
 }
 
 
