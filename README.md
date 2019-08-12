@@ -8,27 +8,6 @@ This exporter serves a Prometheus-compatible `/metrics/` endpoint. It pulls info
 
 This exporter is made available under the terms of the MIT license. You are free to use and modify this script for any purpose as long as you retain the copyright notice in the `LICENSE` file and/or elsewhere in this repository.
 
-## Metrics
-
-This exporter produces the following metrics:
-
-|Name|Type|Description
-|---|---|---
-|`cometserver_api_lookup_duration`|Gauge|The time required to retrieve data from the Comet Server (ms)
-|`cometserver_device_is_current{username,device_id}`|Gauge|Whether each online device is running the current software version (x.x.x)
-|`cometserver_device_is_online{username,device_id}`|Gauge|The online/offline status of each registered device
-|`cometserver_lastbackup_download_size_bytes{username,protected_item_id}`|Gauge|The size (bytes) downloaded during most recent completed backup job for this Protected Item
-|`cometserver_lastbackup_end_time{username,protected_item_id}`|Gauge|The end time of the most recent completed backup job for this Protected Item
-|`cometserver_lastbackup_file_count{username,protected_item_id}`|Gauge|The number of files in the most recent completed backup job for this Protected Item
-|`cometserver_lastbackup_file_size_bytes{username,protected_item_id}`|Gauge|The size (bytes) of the data selected for backup on disk, as of the most recent completed backup job for this Protected Item
-|`cometserver_lastbackup_status{username,protected_item_id,status}`|Gauge|The status of the most recent completed backup job for this Protected Item
-|`cometserver_lastbackup_start_time{username,protected_item_id}`|Gauge|The start time of the most recent completed backup job for this Protected Item
-|`cometserver_lastbackup_upload_size_bytes{username,protected_item_id}`|Gauge|The size (bytes) uploaded during most recent completed backup job for this Protected Item
-|`cometserver_recentjobs_total{status}`|Gauge|Total number of jobs in the last 24 hours
-|`cometserver_storagevault_size_bytes{username,vault_id,vault_type}`|Gauge|The last measured size (in bytes) of each Storage Vault
-|`cometserver_storagevault_quota_bytes{username,vault_id,vault_type}`|Gauge|The quota limit for each Storage Vault, if one is set
-|`cometserver_users_total`|Gauge|Total number of users on this Comet Server
-
 ## Installing
 
 ### Running the exporter (Docker)
@@ -51,3 +30,59 @@ docker run -d --restart=always -e COMET_SERVER_URL="http://127.0.0.1/" -e COMET_
 ### Adding to Prometheus
 
 Add the exporter's URL to `prometheus.yml` in the `scrape_configs` > `static_configs` > `targets` array.
+
+## Metrics
+
+This exporter produces the following metrics:
+
+### Meta
+
+- `cometserver_api_lookup_duration` (Gauge)
+    - The time required to retrieve data from the Comet Server (ms)
+- `cometserver_users_total` (Gauge)
+    - Total number of users on this Comet Server
+
+### Per-device
+
+- `cometserver_device_is_current` (Gauge)
+    - Labels: `username`, `device_id`
+    - Whether each online device is running the current software version (x.x.x)
+- `cometserver_device_is_online` (Gauge)
+    - Labels: `username`, `device_id`
+    - The online/offline status of each registered device
+
+### Last backup job
+
+- `cometserver_lastbackup_download_size_bytes` (Gauge)
+    - Labels: `username`, `protected_item_id`
+    - The size (bytes) downloaded during most recent completed backup job for this Protected Item
+- `cometserver_lastbackup_end_time` (Gauge)
+    - Labels: `username`, `protected_item_id`
+    - The end time of the most recent completed backup job for this Protected Item
+- `cometserver_lastbackup_file_count` (Gauge)
+    - Labels: `username`, `protected_item_id`
+    - The number of files in the most recent completed backup job for this Protected Item
+- `cometserver_lastbackup_file_size_bytes` (Gauge)
+    - Labels: `username` `protected_item_id`
+    - The size (bytes) of the data selected for backup on disk, as of the most recent completed backup job for this Protected Item
+- `cometserver_lastbackup_status` (Gauge)
+    - Labels: `username`, `protected_item_id`, `status`
+    - The status of the most recent completed backup job for this Protected Item
+- `cometserver_lastbackup_start_time` (Gauge)
+    - Labels: `username`, `protected_item_id`
+    - The start time of the most recent completed backup job for this Protected Item
+- `cometserver_lastbackup_upload_size_bytes` (Gauge)
+    - Labels: `username`, `protected_item_id`
+    - The size (bytes) uploaded during most recent completed backup job for this Protected Item
+- `cometserver_recentjobs_total` (Gauge)
+    - Labels: `status`
+    - Total number of jobs in the last 24 hours
+
+### Per-Storage Vault
+
+- `cometserver_storagevault_size_bytes` (Gauge)
+    - Labels: `username`, `vault_id`, `vault_type`
+    - The last measured size (in bytes) of each Storage Vault
+- `cometserver_storagevault_quota_bytes` (Gauge)
+    - Labels: `username`, `vault_id`, `vault_type`
+    - The quota limit for each Storage Vault, if one is set
