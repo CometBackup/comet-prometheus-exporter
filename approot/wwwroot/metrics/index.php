@@ -147,7 +147,10 @@ $lastbackup_status = $registry->registerGauge(
 );
 foreach($users as $user) {
     foreach($user->Sources as $protected_item_id => $protected_item) {
-        if ($protected_item->Statistics->LastBackupJob->StartTime > 0) {
+
+        $has_completed_backup_job = ($protected_item->Statistics->LastBackupJob->StartTime > 0);
+        
+        if ($has_completed_backup_job) {
             $labels = [$user->Username, $protected_item_id];
             $lastbackup_start_time->set($protected_item->Statistics->LastBackupJob->StartTime, $labels);
             $lastbackup_end_time->set($protected_item->Statistics->LastBackupJob->EndTime, $labels);
