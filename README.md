@@ -31,6 +31,29 @@ docker run -d --restart=always -e COMET_SERVER_URL="http://127.0.0.1/" -e COMET_
 
 Add the exporter's URL to `prometheus.yml` in the `scrape_configs` > `static_configs` > `targets` array.
 
+## Developing
+
+### Developing with Docker
+
+To develop the exporter, run a development container that bind-mounts your Git checkout directory:
+
+```bash
+# Replace /c/repos/comet-prometheus-exporter/ with the path to your Git checkout
+docker run --rm \
+    -v /c/repos/comet-prometheus-exporter/approot:/approot \
+    -e COMET_SERVER_URL="http://127.0.0.1/" \
+    -e COMET_ADMIN_USER="admin" \
+    -e COMET_ADMIN_PASS="admin" \
+    -p 12000:80 \
+    comet-prometheus-exporter:latest
+```
+
+You can then visit the development instance in a web browser on http://127.0.0.1:12000/metrics/ for development and troubleshooting.
+
+### Submitting your changes (Optional)
+
+If you've made a change to the exporter that you think would be useful for other partners too, we'd love to incorporate it - please submit a [pull request on GitHub](https://github.com/CometBackup/comet-prometheus-exporter/pulls) or send your modifications via the [CometBackup.com](https://cometbackup.com/) ticket system.
+
 ## Metrics
 
 This exporter produces the following metrics:
