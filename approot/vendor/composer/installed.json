@@ -250,22 +250,23 @@
     },
     {
         "name": "jimdo/prometheus_client_php",
-        "version": "v0.9.1",
-        "version_normalized": "0.9.1.0",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
         "source": {
             "type": "git",
             "url": "https://github.com/Jimdo/prometheus_client_php.git",
-            "reference": "cf3ea93197400a97464ff9bee78cf2169f035327"
+            "reference": "215c9ae5ea006634e908be78b29edad88d36f94f"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Jimdo/prometheus_client_php/zipball/cf3ea93197400a97464ff9bee78cf2169f035327",
-            "reference": "cf3ea93197400a97464ff9bee78cf2169f035327",
+            "url": "https://api.github.com/repos/Jimdo/prometheus_client_php/zipball/215c9ae5ea006634e908be78b29edad88d36f94f",
+            "reference": "215c9ae5ea006634e908be78b29edad88d36f94f",
             "shasum": ""
         },
         "require": {
             "guzzlehttp/guzzle": "^6.2",
-            "php": ">=5.6.3"
+            "php": ">=5.6.3",
+            "symfony/polyfill-apcu": "^1.6"
         },
         "require-dev": {
             "phpunit/phpunit": "4.1.0"
@@ -274,9 +275,9 @@
             "ext-apc": "Required if using APCu.",
             "ext-redis": "Required if using Redis."
         },
-        "time": "2017-11-06T11:00:07+00:00",
+        "time": "2019-05-24T13:32:31+00:00",
         "type": "library",
-        "installation-source": "dist",
+        "installation-source": "source",
         "autoload": {
             "psr-0": {
                 "Prometheus\\": "src/"
@@ -390,5 +391,63 @@
             }
         ],
         "description": "A polyfill for getallheaders."
+    },
+    {
+        "name": "symfony/polyfill-apcu",
+        "version": "v1.12.0",
+        "version_normalized": "1.12.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/symfony/polyfill-apcu.git",
+            "reference": "71ce80635d5dcd67772b4dda00b86068595f64d5"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/symfony/polyfill-apcu/zipball/71ce80635d5dcd67772b4dda00b86068595f64d5",
+            "reference": "71ce80635d5dcd67772b4dda00b86068595f64d5",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.3"
+        },
+        "time": "2019-08-06T08:03:45+00:00",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "1.12-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Symfony\\Polyfill\\Apcu\\": ""
+            },
+            "files": [
+                "bootstrap.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Nicolas Grekas",
+                "email": "p@tchwork.com"
+            },
+            {
+                "name": "Symfony Community",
+                "homepage": "https://symfony.com/contributors"
+            }
+        ],
+        "description": "Symfony polyfill backporting apcu_* functions to lower PHP versions",
+        "homepage": "https://symfony.com",
+        "keywords": [
+            "apcu",
+            "compatibility",
+            "polyfill",
+            "portable",
+            "shim"
+        ]
     }
 ]
