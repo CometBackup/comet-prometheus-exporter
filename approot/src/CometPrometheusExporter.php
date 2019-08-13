@@ -172,43 +172,43 @@ class CometPrometheusExporter {
             'cometserver',
             'lastbackup_start_time',
             'The start time of the most recent completed backup job for this Protected Item',
-            ['username', 'protected_item_id']
+            ['username', 'protected_item_id', 'protected_item_name']
         );
         $lastbackup_end_time = $this->registry->registerGauge(
             'cometserver',
             'lastbackup_end_time',
             'The end time of the most recent completed backup job for this Protected Item',
-            ['username', 'protected_item_id']
+            ['username', 'protected_item_id', 'protected_item_name']
         );
         $lastbackup_file_count = $this->registry->registerGauge(
             'cometserver',
             'lastbackup_file_count',
             'The number of files in the most recent completed backup job for this Protected Item',
-            ['username', 'protected_item_id']
+            ['username', 'protected_item_id', 'protected_item_name']
         );
         $lastbackup_file_size = $this->registry->registerGauge(
             'cometserver',
             'lastbackup_file_size_bytes',
             'The size (bytes) of the data selected for backup on disk, as of the most recent completed backup job for this Protected Item',
-            ['username', 'protected_item_id']
+            ['username', 'protected_item_id', 'protected_item_name']
         );
         $lastbackup_upload_size = $this->registry->registerGauge(
             'cometserver',
             'lastbackup_upload_size_bytes',
             'The size (bytes) uploaded during most recent completed backup job for this Protected Item',
-            ['username', 'protected_item_id']
+            ['username', 'protected_item_id', 'protected_item_name']
         );
         $lastbackup_download_size = $this->registry->registerGauge(
             'cometserver',
             'lastbackup_download_size_bytes',
             'The size (bytes) downloaded during most recent completed backup job for this Protected Item',
-            ['username', 'protected_item_id']
+            ['username', 'protected_item_id', 'protected_item_name']
         );
         $lastbackup_status = $this->registry->registerGauge(
             'cometserver',
             'lastbackup_status',
             'The status of the most recent completed backup job for this Protected Item.',
-            ['username', 'protected_item_id', 'status']
+            ['username', 'protected_item_id', 'protected_item_name', 'status']
         );
         foreach($users as $user) {
             foreach($user->Sources as $protected_item_id => $protected_item) {
@@ -216,7 +216,8 @@ class CometPrometheusExporter {
                 $has_completed_backup_job = ($protected_item->Statistics->LastBackupJob->StartTime > 0);
                 
                 if ($has_completed_backup_job) {
-                    $labels = [$user->Username, $protected_item_id];
+                    $labels = [$user->Username, $protected_item_id, $protected_item->Description];
+
                     $lastbackup_start_time->set($protected_item->Statistics->LastBackupJob->StartTime, $labels);
                     $lastbackup_end_time->set($protected_item->Statistics->LastBackupJob->EndTime, $labels);
                     $lastbackup_file_count->set($protected_item->Statistics->LastBackupJob->TotalFiles, $labels);
@@ -227,11 +228,11 @@ class CometPrometheusExporter {
                     $job_category = self::categoriseJobStatus($protected_item->Statistics->LastBackupJob);
                     foreach(self::jobStatusCategories() as $category) {
                         if ($category === $job_category) {
-                            $lastbackup_status->set(1, [$user->Username, $protected_item_id, $category]);
+                            $lastbackup_status->set(1, [$user->Username, $protected_item_id, $protected_item->Description, $category]);
 
                         } else {
                             // Add a zero value for this job category
-                            $lastbackup_status->set(0, [$user->Username, $protected_item_id, $category]);
+                            $lastbackup_status->set(0, [$user->Username, $protected_item_id, $protected_item->Description, $category]);
                         }
                     }
                 }
