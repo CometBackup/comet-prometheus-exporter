@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.0 (2019-08-13)
+
+- BREAKING: Add zero values for `cometserver_lastbackup_status` enum-style metric
+- Feature: Add `vault_name`, `device_name`, `protected_item_name` labels to the `storagevault_*`, `device_is_*`, and `lastbackup_*` metrics respectively
+- Enhancement: Document recommended development environment
+
 ## v0.4.0 (2019-07-30)
 
 - Feature: Add `cometserver_lastbackup_status` enum-style metric
