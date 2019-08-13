@@ -64,6 +64,9 @@ This exporter produces the following metrics:
     - The time required to retrieve data from the Comet Server (ms)
 - `cometserver_users_total` (Gauge)
     - Total number of users on this Comet Server
+- `cometserver_recentjobs_total` (Gauge)
+    - Labels: `status`
+    - Total number of jobs in the last 24 hours
 
 ### Per-device
 
@@ -97,9 +100,6 @@ This exporter produces the following metrics:
 - `cometserver_lastbackup_upload_size_bytes` (Gauge)
     - Labels: `username`, `protected_item_id`
     - The size (bytes) uploaded during most recent completed backup job for this Protected Item
-- `cometserver_recentjobs_total` (Gauge)
-    - Labels: `status`
-    - Total number of jobs in the last 24 hours
 
 ### Per-Storage Vault
 
