@@ -222,7 +222,16 @@ class CometPrometheusExporter {
                     $lastbackup_upload_size->set($protected_item->Statistics->LastBackupJob->UploadSize, $labels);
                     $lastbackup_download_size->set($protected_item->Statistics->LastBackupJob->DownloadSize, $labels);
 
-                    $lastbackup_status->set(1, [$user->Username, $protected_item_id, self::categoriseJobStatus($protected_item->Statistics->LastBackupJob)]);
+                    $job_category = self::categoriseJobStatus($protected_item->Statistics->LastBackupJob);
+                    foreach(self::jobStatusCategories() as $category) {
+                        if ($category === $job_category) {
+                            $lastbackup_status->set(1, [$user->Username, $protected_item_id, $category]);
+
+                        } else {
+                            // Add a zero value for this job category
+                            $lastbackup_status->set(0, [$user->Username, $protected_item_id, $category]);
+                        }
+                    }
                 }
             }
         }
