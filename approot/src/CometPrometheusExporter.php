@@ -68,7 +68,7 @@ class CometPrometheusExporter {
         $this->addLastBackupMetrics($users);
         $this->addRecentJobsMetrics($recentjobs);
         $this->addOnlineStatusMetrics($users, $online_devices);
-        $this->addDeviceIsCurrentMetrics($online_devices, $serverinfo);
+        $this->addDeviceIsCurrentMetrics($users, $online_devices, $serverinfo);
         
         // Render result
 
@@ -317,7 +317,7 @@ class CometPrometheusExporter {
             'cometserver',
             'device_is_online',
             "The online/offline status of each registered device",
-            ['username', 'device_id']
+            ['username', 'device_id', 'device_name']
         );
 
         $device_is_online_lookup = []; // Build inverted index of online devices for traversal
@@ -329,7 +329,10 @@ class CometPrometheusExporter {
         foreach($users as $username => $user) {
             foreach($user->Devices as $device_id => $device) {
                 $is_online = array_key_exists($username . "\x00" . $device_id, $device_is_online_lookup);
-                $device_is_online_gauge->set($is_online ? 1 : 0, [$username, $device_id]);
+                $device_is_online_gauge->set(
+                    $is_online ? 1 : 0,
+                    [$username, $device_id, $device->FriendlyName]
+                );
             }
         }
     }
@@ -338,23 +341,28 @@ class CometPrometheusExporter {
      * Register metric
      * Up-to-date status of each device
      *
+     * @param \Comet\UserProfileConfig[] $users Result of AdminListUsersFull API call
      * @param \Comet\LiveUserConnection[] $online_devices
      * @param \Comet\ServerMetaVersionInfo $serverinfo
      * @return void
      */
-    public function addDeviceIsCurrentMetrics(array $online_devices, \Comet\ServerMetaVersionInfo $serverinfo): void {
+    public function addDeviceIsCurrentMetrics(array $users, array $online_devices, \Comet\ServerMetaVersionInfo $serverinfo): void {
 
         $device_is_current_gauge = $this->registry->registerGauge(
             'cometserver',
             'device_is_current',
             "Whether each online device is running the current software version (" . $serverinfo->Version . ")",
-            ['username', 'device_id']
+            ['username', 'device_id', 'device_name']
         );
 
         foreach($online_devices as $live_connection) {
+
+            // Try to find the friendly-name for this device
+            $device_friendly_name = $users[$live_connection->Username]->Devices[$live_connection->DeviceID]->FriendlyName ?: ''; // (unknown)
+
             $device_is_current_gauge->set(
                 ($live_connection->ReportedVersion == $serverinfo->Version) ? 1 : 0,
-                [$live_connection->Username, $live_connection->DeviceID]
+                [$live_connection->Username, $live_connection->DeviceID, $device_friendly_name]
             );
         }
     }
