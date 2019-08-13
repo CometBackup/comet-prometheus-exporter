@@ -123,13 +123,13 @@ class CometPrometheusExporter {
             'cometserver',
             'storagevault_size_bytes',
             'The last measured size (in bytes) of each Storage Vault',
-            ['username', 'vault_id', 'vault_type']
+            ['username', 'vault_id', 'vault_name', 'vault_type']
         );
         $vault_quota_gauge = $this->registry->registerGauge(
             'cometserver',
             'storagevault_quota_bytes',
             'The quota limit for each Storage Vault, if one is set',
-            ['username', 'vault_id', 'vault_type']
+            ['username', 'vault_id', 'vault_name', 'vault_type']
         );
 
         foreach($users as $user) {
@@ -139,6 +139,7 @@ class CometPrometheusExporter {
                     [
                         $user->Username,
                         $storage_vault_id,
+                        $storage_vault->Description,
                         $storage_vault->DestinationType,
                     ]
                 );
@@ -149,6 +150,7 @@ class CometPrometheusExporter {
                         [
                             $user->Username,
                             $storage_vault_id,
+                            $storage_vault->Description,
                             $storage_vault->DestinationType,
                         ]
                     );
