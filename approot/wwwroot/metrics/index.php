@@ -9,6 +9,17 @@ require '../../vendor/autoload.php';
 class CometPrometheusExporter {
 
     /**
+     * Special labels used to group job report status types in the Prometheus output format
+     * 
+     * @var string
+     */
+    const SUCCESS = "success";
+    const RUNNING = "running";
+    const WARNING = "warning";
+    const QUOTAEXCEEDED = "quota_exceeded";
+    const ERROR = "error";
+
+    /**
      * The remote Comet Server that this exporter is connected to
      *
      * @var \Comet\Server
@@ -218,6 +229,21 @@ class CometPrometheusExporter {
     }
 
     /**
+     * List the available groups that categoriseJobStatus() will categorise into.
+     *
+     * @return string[]
+     */
+    protected static function jobStatusCategories(): array {
+        return [
+            self::SUCCESS,
+            self::RUNNING,
+            self::WARNING,
+            self::QUOTAEXCEEDED,
+            self::ERROR,
+        ];
+    }
+
+    /**
      * Categorise a backup job into a fixed number of known types.
      *
      * @param \Comet\BackupJobDetail $job
@@ -225,19 +251,19 @@ class CometPrometheusExporter {
      */
     protected static function categoriseJobStatus(\Comet\BackupJobDetail $job): string {
         if ($job->Status >= \Comet\Def::JOB_STATUS_STOP_SUCCESS__MIN && $job->Status <= \Comet\Def::JOB_STATUS_STOP_SUCCESS__MAX) {
-            return 'success';
+            return self::SUCCESS;
 
         } else if ($job->Status >= \Comet\Def::JOB_STATUS_RUNNING__MIN && $job->Status <= \Comet\Def::JOB_STATUS_RUNNING__MAX) {
-            return 'running';
+            return self::RUNNING;
 
         } else if ($job->Status == \Comet\Def::JOB_STATUS_FAILED_WARNING) {
-            return 'warning';
+            return self::WARNING;
 
         } else if ($job->Status == \Comet\Def::JOB_STATUS_FAILED_QUOTA) {
-            return 'quota_exceeded';
+            return self::QUOTAEXCEEDED;
 
         } else {
-            return 'error';
+            return self::ERROR;
 
         }
     }
@@ -257,12 +283,10 @@ class CometPrometheusExporter {
             ['status']
         );
 
-        $recentjobs_gauge->set(0, ['success']);
-        $recentjobs_gauge->set(0, ['running']);
-        $recentjobs_gauge->set(0, ['warning']);
-        $recentjobs_gauge->set(0, ['quota_exceeded']);
-        $recentjobs_gauge->set(0, ['error']);
-
+        foreach(self::jobStatusCategories() as $category) {
+            $recentjobs_gauge->set(0, [$category]);
+        }
+        
         foreach($recentjobs as $job) {
             $recentjobs_gauge->inc([ self::categoriseJobStatus($job) ]);
         }
