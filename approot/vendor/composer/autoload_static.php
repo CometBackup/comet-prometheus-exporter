@@ -27,6 +27,7 @@ class ComposerStaticInitebee2e5d0aee1691d257e0cf5f926d9d
         'C' => 
         array (
             'Comet\\' => 6,
+            'CometPrometheusExporter\\' => 24,
         ),
     );
 
@@ -50,6 +51,10 @@ class ComposerStaticInitebee2e5d0aee1691d257e0cf5f926d9d
         'Comet\\' => 
         array (
             0 => __DIR__ . '/..' . '/cometbackup/comet-php-sdk/Comet',
+        ),
+        'CometPrometheusExporter\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
         ),
     );
 
