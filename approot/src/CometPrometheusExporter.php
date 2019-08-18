@@ -169,7 +169,7 @@ class CometPrometheusExporter {
     public function addLastBackupMetrics(array $users): void {
 
         $common_label_names = [
-            'username', 'protected_item_id', 'protected_item_name',
+            'username', 'protected_item_id', 'protected_item_name', 'device_id', 'device_name'
         ];
 
         $lastbackup_start_time = $this->registry->registerGauge(
@@ -224,6 +224,8 @@ class CometPrometheusExporter {
                         $user->Username,
                         $protected_item_id,
                         $protected_item->Description,
+                        $protected_item->OwnerDevice,
+                        ($user->Devices[$protected_item->OwnerDevice]->FriendlyName ?? '')
                     ];
 
                     $lastbackup_start_time->set($protected_item->Statistics->LastBackupJob->StartTime, $common_label_values);
