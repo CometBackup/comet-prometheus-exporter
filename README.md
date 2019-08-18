@@ -80,25 +80,25 @@ This exporter produces the following metrics:
 ### Last backup job
 
 - `cometserver_lastbackup_download_size_bytes` (Gauge)
-    - Labels: `username`, `protected_item_id`, `protected_item_name`
+    - Labels: `username`, `protected_item_id`, `protected_item_name`, `device_id`, `device_name`
     - The size (bytes) downloaded during most recent completed backup job for this Protected Item
 - `cometserver_lastbackup_end_time` (Gauge)
-    - Labels: `username`, `protected_item_id`, `protected_item_name`
+    - Labels: `username`, `protected_item_id`, `protected_item_name`, `device_id`, `device_name`
     - The end time of the most recent completed backup job for this Protected Item
 - `cometserver_lastbackup_file_count` (Gauge)
-    - Labels: `username`, `protected_item_id`, `protected_item_name`
+    - Labels: `username`, `protected_item_id`, `protected_item_name`, `device_id`, `device_name`
     - The number of files in the most recent completed backup job for this Protected Item
 - `cometserver_lastbackup_file_size_bytes` (Gauge)
-    - Labels: `username` `protected_item_id`, `protected_item_name`
+    - Labels: `username` `protected_item_id`, `protected_item_name`, `device_id`, `device_name`
     - The size (bytes) of the data selected for backup on disk, as of the most recent completed backup job for this Protected Item
 - `cometserver_lastbackup_status` (Gauge)
-    - Labels: `username`, `protected_item_id`, `status`, `protected_item_name`
+    - Labels: `username`, `protected_item_id`, `protected_item_name`, `device_id`, `device_name`, `status`
     - The status of the most recent completed backup job for this Protected Item
 - `cometserver_lastbackup_start_time` (Gauge)
-    - Labels: `username`, `protected_item_id`, `protected_item_name`
+    - Labels: `username`, `protected_item_id`, `protected_item_name`, `device_id`, `device_name`
     - The start time of the most recent completed backup job for this Protected Item
 - `cometserver_lastbackup_upload_size_bytes` (Gauge)
-    - Labels: `username`, `protected_item_id`, `protected_item_name`
+    - Labels: `username`, `protected_item_id`, `protected_item_name`, `device_id`, `device_name`
     - The size (bytes) uploaded during most recent completed backup job for this Protected Item
 
 ### Per-Storage Vault
