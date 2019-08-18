@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.1 (2019-08-19)
+
+- Feature: Add `device_id`, `device_name` labels to the `lastbackup_*` metrics
+
 ## v0.5.0 (2019-08-13)
 
 - BREAKING: Add zero values for `cometserver_lastbackup_status` enum-style metric
