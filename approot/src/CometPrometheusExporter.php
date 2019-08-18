@@ -168,47 +168,51 @@ class CometPrometheusExporter {
      */
     public function addLastBackupMetrics(array $users): void {
 
+        $common_label_names = [
+            'username', 'protected_item_id', 'protected_item_name',
+        ];
+
         $lastbackup_start_time = $this->registry->registerGauge(
             'cometserver',
             'lastbackup_start_time',
             'The start time of the most recent completed backup job for this Protected Item',
-            ['username', 'protected_item_id', 'protected_item_name']
+            $common_label_names
         );
         $lastbackup_end_time = $this->registry->registerGauge(
             'cometserver',
             'lastbackup_end_time',
             'The end time of the most recent completed backup job for this Protected Item',
-            ['username', 'protected_item_id', 'protected_item_name']
+            $common_label_names
         );
         $lastbackup_file_count = $this->registry->registerGauge(
             'cometserver',
             'lastbackup_file_count',
             'The number of files in the most recent completed backup job for this Protected Item',
-            ['username', 'protected_item_id', 'protected_item_name']
+            $common_label_names
         );
         $lastbackup_file_size = $this->registry->registerGauge(
             'cometserver',
             'lastbackup_file_size_bytes',
             'The size (bytes) of the data selected for backup on disk, as of the most recent completed backup job for this Protected Item',
-            ['username', 'protected_item_id', 'protected_item_name']
+            $common_label_names
         );
         $lastbackup_upload_size = $this->registry->registerGauge(
             'cometserver',
             'lastbackup_upload_size_bytes',
             'The size (bytes) uploaded during most recent completed backup job for this Protected Item',
-            ['username', 'protected_item_id', 'protected_item_name']
+            $common_label_names
         );
         $lastbackup_download_size = $this->registry->registerGauge(
             'cometserver',
             'lastbackup_download_size_bytes',
             'The size (bytes) downloaded during most recent completed backup job for this Protected Item',
-            ['username', 'protected_item_id', 'protected_item_name']
+            $common_label_names
         );
         $lastbackup_status = $this->registry->registerGauge(
             'cometserver',
             'lastbackup_status',
             'The status of the most recent completed backup job for this Protected Item.',
-            ['username', 'protected_item_id', 'protected_item_name', 'status']
+            array_merge($common_label_names, ['status'])
         );
         foreach($users as $user) {
             foreach($user->Sources as $protected_item_id => $protected_item) {
@@ -216,23 +220,27 @@ class CometPrometheusExporter {
                 $has_completed_backup_job = ($protected_item->Statistics->LastBackupJob->StartTime > 0);
                 
                 if ($has_completed_backup_job) {
-                    $labels = [$user->Username, $protected_item_id, $protected_item->Description];
+                    $common_label_values = [
+                        $user->Username,
+                        $protected_item_id,
+                        $protected_item->Description,
+                    ];
 
-                    $lastbackup_start_time->set($protected_item->Statistics->LastBackupJob->StartTime, $labels);
-                    $lastbackup_end_time->set($protected_item->Statistics->LastBackupJob->EndTime, $labels);
-                    $lastbackup_file_count->set($protected_item->Statistics->LastBackupJob->TotalFiles, $labels);
-                    $lastbackup_file_size->set($protected_item->Statistics->LastBackupJob->TotalSize, $labels);
-                    $lastbackup_upload_size->set($protected_item->Statistics->LastBackupJob->UploadSize, $labels);
-                    $lastbackup_download_size->set($protected_item->Statistics->LastBackupJob->DownloadSize, $labels);
+                    $lastbackup_start_time->set($protected_item->Statistics->LastBackupJob->StartTime, $common_label_values);
+                    $lastbackup_end_time->set($protected_item->Statistics->LastBackupJob->EndTime, $common_label_values);
+                    $lastbackup_file_count->set($protected_item->Statistics->LastBackupJob->TotalFiles, $common_label_values);
+                    $lastbackup_file_size->set($protected_item->Statistics->LastBackupJob->TotalSize, $common_label_values);
+                    $lastbackup_upload_size->set($protected_item->Statistics->LastBackupJob->UploadSize, $common_label_values);
+                    $lastbackup_download_size->set($protected_item->Statistics->LastBackupJob->DownloadSize, $common_label_values);
 
                     $job_category = self::categoriseJobStatus($protected_item->Statistics->LastBackupJob);
                     foreach(self::jobStatusCategories() as $category) {
                         if ($category === $job_category) {
-                            $lastbackup_status->set(1, [$user->Username, $protected_item_id, $protected_item->Description, $category]);
+                            $lastbackup_status->set(1, array_merge($common_label_values, [$category]));
 
                         } else {
                             // Add a zero value for this job category
-                            $lastbackup_status->set(0, [$user->Username, $protected_item_id, $protected_item->Description, $category]);
+                            $lastbackup_status->set(0, array_merge($common_label_values, [$category]));
                         }
                     }
                 }
