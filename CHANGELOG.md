@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.5.2 (2020-09-03)
+
+- Update dependencies
+- Improve performance of receiving data from the Comet Server
+
 ## v0.5.1 (2019-08-19)
 
 - Feature: Add `device_id`, `device_name` labels to the `lastbackup_*` metrics
