@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -51,10 +51,12 @@ class DispatcherAdminSourcesResponse {
 		}
 		if (property_exists($sc, 'ImportSources')) {
 			$val_2 = [];
-			foreach($sc->ImportSources as $k_2 => $v_2) {
-				$phpk_2 = (string)($k_2);
-				$phpv_2 = (string)($v_2);
-				$val_2[$phpk_2] = $phpv_2;
+			if ($sc->ImportSources !== null) {
+				foreach($sc->ImportSources as $k_2 => $v_2) {
+					$phpk_2 = (string)($k_2);
+					$phpv_2 = (string)($v_2);
+					$val_2[$phpk_2] = $phpv_2;
+				}
 			}
 			$this->ImportSources = $val_2;
 		}
@@ -176,7 +178,7 @@ class DispatcherAdminSourcesResponse {
 	 */
 	public function toJSON()
 	{
-		$arr = self::toArray(true);
+		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
@@ -192,7 +194,7 @@ class DispatcherAdminSourcesResponse {
 	 */
 	public function toStdClass()
 	{
-		$arr = self::toArray(false);
+		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {

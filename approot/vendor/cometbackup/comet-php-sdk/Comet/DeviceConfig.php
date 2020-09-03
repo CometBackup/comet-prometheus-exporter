@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -15,6 +15,11 @@ class DeviceConfig {
 	 * @var string
 	 */
 	public $FriendlyName = "";
+	
+	/**
+	 * @var \Comet\OSInfo
+	 */
+	public $PlatformVersion = null;
 	
 	/**
 	 * @var \Comet\SourceBasicInfo[] An array with string keys.
@@ -41,23 +46,34 @@ class DeviceConfig {
 		if (property_exists($sc, 'FriendlyName')) {
 			$this->FriendlyName = (string)($sc->FriendlyName);
 		}
+		if (property_exists($sc, 'PlatformVersion')) {
+			if (is_array($sc->PlatformVersion) && count($sc->PlatformVersion) === 0) {
+			// Work around edge case in json_decode--json_encode stdClass conversion
+				$this->PlatformVersion = \Comet\OSInfo::createFromStdclass(new \stdClass());
+			} else {
+				$this->PlatformVersion = \Comet\OSInfo::createFromStdclass($sc->PlatformVersion);
+			}
+		}
 		if (property_exists($sc, 'Sources')) {
 			$val_2 = [];
-			foreach($sc->Sources as $k_2 => $v_2) {
-				$phpk_2 = (string)($k_2);
-				if (is_array($v_2) && count($v_2) === 0) {
-				// Work around edge case in json_decode--json_encode stdClass conversion
-					$phpv_2 = \Comet\SourceBasicInfo::createFromStdclass(new \stdClass());
-				} else {
-					$phpv_2 = \Comet\SourceBasicInfo::createFromStdclass($v_2);
+			if ($sc->Sources !== null) {
+				foreach($sc->Sources as $k_2 => $v_2) {
+					$phpk_2 = (string)($k_2);
+					if (is_array($v_2) && count($v_2) === 0) {
+					// Work around edge case in json_decode--json_encode stdClass conversion
+						$phpv_2 = \Comet\SourceBasicInfo::createFromStdclass(new \stdClass());
+					} else {
+						$phpv_2 = \Comet\SourceBasicInfo::createFromStdclass($v_2);
+					}
+					$val_2[$phpk_2] = $phpv_2;
 				}
-				$val_2[$phpk_2] = $phpv_2;
 			}
 			$this->Sources = $val_2;
 		}
 		foreach(get_object_vars($sc) as $k => $v) {
 			switch($k) {
 			case 'FriendlyName':
+			case 'PlatformVersion':
 			case 'Sources':
 				break;
 			default:
@@ -141,6 +157,11 @@ class DeviceConfig {
 	{
 		$ret = [];
 		$ret["FriendlyName"] = $this->FriendlyName;
+		if ( $this->PlatformVersion === null ) {
+			$ret["PlatformVersion"] = $for_json_encode ? (object)[] : [];
+		} else {
+			$ret["PlatformVersion"] = $this->PlatformVersion->toArray($for_json_encode);
+		}
 		{
 			$c0 = [];
 			foreach($this->Sources as $k0 => $v0) {
@@ -175,7 +196,7 @@ class DeviceConfig {
 	 */
 	public function toJSON()
 	{
-		$arr = self::toArray(true);
+		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
@@ -191,7 +212,7 @@ class DeviceConfig {
 	 */
 	public function toStdClass()
 	{
-		$arr = self::toArray(false);
+		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {
@@ -207,6 +228,9 @@ class DeviceConfig {
 	public function RemoveUnknownProperties()
 	{
 		$this->__unknown_properties = [];
+		if ($this->PlatformVersion !== null) {
+			$this->PlatformVersion->RemoveUnknownProperties();
+		}
 	}
 	
 }

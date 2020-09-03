@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -20,6 +20,21 @@ class AdminUserPermissions {
 	 * @var boolean
 	 */
 	public $PreventServerShutdown = false;
+	
+	/**
+	 * @var boolean
+	 */
+	public $PreventChangePassword = false;
+	
+	/**
+	 * @var boolean
+	 */
+	public $AllowEditBranding = false;
+	
+	/**
+	 * @var boolean
+	 */
+	public $AllowEditRemoteStorage = false;
 	
 	/**
 	 * Preserve unknown properties when dealing with future server versions.
@@ -44,10 +59,22 @@ class AdminUserPermissions {
 		if (property_exists($sc, 'PreventServerShutdown')) {
 			$this->PreventServerShutdown = (bool)($sc->PreventServerShutdown);
 		}
+		if (property_exists($sc, 'PreventChangePassword')) {
+			$this->PreventChangePassword = (bool)($sc->PreventChangePassword);
+		}
+		if (property_exists($sc, 'AllowEditBranding')) {
+			$this->AllowEditBranding = (bool)($sc->AllowEditBranding);
+		}
+		if (property_exists($sc, 'AllowEditRemoteStorage')) {
+			$this->AllowEditRemoteStorage = (bool)($sc->AllowEditRemoteStorage);
+		}
 		foreach(get_object_vars($sc) as $k => $v) {
 			switch($k) {
 			case 'PreventEditServerSettings':
 			case 'PreventServerShutdown':
+			case 'PreventChangePassword':
+			case 'AllowEditBranding':
+			case 'AllowEditRemoteStorage':
 				break;
 			default:
 				$this->__unknown_properties[$k] = $v;
@@ -131,6 +158,9 @@ class AdminUserPermissions {
 		$ret = [];
 		$ret["PreventEditServerSettings"] = $this->PreventEditServerSettings;
 		$ret["PreventServerShutdown"] = $this->PreventServerShutdown;
+		$ret["PreventChangePassword"] = $this->PreventChangePassword;
+		$ret["AllowEditBranding"] = $this->AllowEditBranding;
+		$ret["AllowEditRemoteStorage"] = $this->AllowEditRemoteStorage;
 		
 		// Reinstate unknown properties from future server versions
 		foreach($this->__unknown_properties as $k => $v) {
@@ -148,7 +178,7 @@ class AdminUserPermissions {
 	 */
 	public function toJSON()
 	{
-		$arr = self::toArray(true);
+		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
@@ -164,7 +194,7 @@ class AdminUserPermissions {
 	 */
 	public function toStdClass()
 	{
-		$arr = self::toArray(false);
+		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -25,6 +25,11 @@ class UserPolicy {
 	 * @var boolean
 	 */
 	public $PreventEditStorageVault = false;
+	
+	/**
+	 * @var boolean
+	 */
+	public $HideCloudStorageBranding = false;
 	
 	/**
 	 * @var boolean
@@ -77,6 +82,11 @@ class UserPolicy {
 	public $ModeAdminViewFilenames = 0;
 	
 	/**
+	 * @var int
+	 */
+	public $ModeRequireUserResetPassword = 0;
+	
+	/**
 	 * @var boolean
 	 */
 	public $PreventDeleteSingleSnapshots = false;
@@ -100,6 +110,11 @@ class UserPolicy {
 	 * @var boolean
 	 */
 	public $PreventOpenAppUI = false;
+	
+	/**
+	 * @var boolean
+	 */
+	public $RequirePasswordOpenAppUI = false;
 	
 	/**
 	 * @var boolean
@@ -142,6 +157,21 @@ class UserPolicy {
 	public $PreventProtectedItemRetention = false;
 	
 	/**
+	 * @var \Comet\SourceConfig[] An array with string keys.
+	 */
+	public $DefaultSources = [];
+	
+	/**
+	 * @var \Comet\BackupRuleConfig[] An array with string keys.
+	 */
+	public $DefaultSourcesBackupRules = [];
+	
+	/**
+	 * @var \Comet\BackupRuleConfig[] An array with string keys.
+	 */
+	public $DefaultBackupRules = [];
+	
+	/**
 	 * Preserve unknown properties when dealing with future server versions.
 	 *
 	 * @see UserPolicy::RemoveUnknownProperties() Remove all unknown properties
@@ -166,6 +196,9 @@ class UserPolicy {
 		}
 		if (property_exists($sc, 'PreventEditStorageVault')) {
 			$this->PreventEditStorageVault = (bool)($sc->PreventEditStorageVault);
+		}
+		if (property_exists($sc, 'HideCloudStorageBranding')) {
+			$this->HideCloudStorageBranding = (bool)($sc->HideCloudStorageBranding);
 		}
 		if (property_exists($sc, 'PreventDeleteStorageVault')) {
 			$this->PreventDeleteStorageVault = (bool)($sc->PreventDeleteStorageVault);
@@ -218,6 +251,9 @@ class UserPolicy {
 		if (property_exists($sc, 'ModeAdminViewFilenames')) {
 			$this->ModeAdminViewFilenames = (int)($sc->ModeAdminViewFilenames);
 		}
+		if (property_exists($sc, 'ModeRequireUserResetPassword')) {
+			$this->ModeRequireUserResetPassword = (int)($sc->ModeRequireUserResetPassword);
+		}
 		if (property_exists($sc, 'PreventDeleteSingleSnapshots')) {
 			$this->PreventDeleteSingleSnapshots = (bool)($sc->PreventDeleteSingleSnapshots);
 		}
@@ -232,6 +268,9 @@ class UserPolicy {
 		}
 		if (property_exists($sc, 'PreventOpenAppUI')) {
 			$this->PreventOpenAppUI = (bool)($sc->PreventOpenAppUI);
+		}
+		if (property_exists($sc, 'RequirePasswordOpenAppUI')) {
+			$this->RequirePasswordOpenAppUI = (bool)($sc->RequirePasswordOpenAppUI);
 		}
 		if (property_exists($sc, 'HideAppImport')) {
 			$this->HideAppImport = (bool)($sc->HideAppImport);
@@ -267,11 +306,60 @@ class UserPolicy {
 		if (property_exists($sc, 'PreventProtectedItemRetention')) {
 			$this->PreventProtectedItemRetention = (bool)($sc->PreventProtectedItemRetention);
 		}
+		if (property_exists($sc, 'DefaultSources')) {
+			$val_2 = [];
+			if ($sc->DefaultSources !== null) {
+				foreach($sc->DefaultSources as $k_2 => $v_2) {
+					$phpk_2 = (string)($k_2);
+					if (is_array($v_2) && count($v_2) === 0) {
+					// Work around edge case in json_decode--json_encode stdClass conversion
+						$phpv_2 = \Comet\SourceConfig::createFromStdclass(new \stdClass());
+					} else {
+						$phpv_2 = \Comet\SourceConfig::createFromStdclass($v_2);
+					}
+					$val_2[$phpk_2] = $phpv_2;
+				}
+			}
+			$this->DefaultSources = $val_2;
+		}
+		if (property_exists($sc, 'DefaultSourcesBackupRules')) {
+			$val_2 = [];
+			if ($sc->DefaultSourcesBackupRules !== null) {
+				foreach($sc->DefaultSourcesBackupRules as $k_2 => $v_2) {
+					$phpk_2 = (string)($k_2);
+					if (is_array($v_2) && count($v_2) === 0) {
+					// Work around edge case in json_decode--json_encode stdClass conversion
+						$phpv_2 = \Comet\BackupRuleConfig::createFromStdclass(new \stdClass());
+					} else {
+						$phpv_2 = \Comet\BackupRuleConfig::createFromStdclass($v_2);
+					}
+					$val_2[$phpk_2] = $phpv_2;
+				}
+			}
+			$this->DefaultSourcesBackupRules = $val_2;
+		}
+		if (property_exists($sc, 'DefaultBackupRules')) {
+			$val_2 = [];
+			if ($sc->DefaultBackupRules !== null) {
+				foreach($sc->DefaultBackupRules as $k_2 => $v_2) {
+					$phpk_2 = (string)($k_2);
+					if (is_array($v_2) && count($v_2) === 0) {
+					// Work around edge case in json_decode--json_encode stdClass conversion
+						$phpv_2 = \Comet\BackupRuleConfig::createFromStdclass(new \stdClass());
+					} else {
+						$phpv_2 = \Comet\BackupRuleConfig::createFromStdclass($v_2);
+					}
+					$val_2[$phpk_2] = $phpv_2;
+				}
+			}
+			$this->DefaultBackupRules = $val_2;
+		}
 		foreach(get_object_vars($sc) as $k => $v) {
 			switch($k) {
 			case 'PreventRequestStorageVault':
 			case 'PreventAddCustomStorageVault':
 			case 'PreventEditStorageVault':
+			case 'HideCloudStorageBranding':
 			case 'PreventDeleteStorageVault':
 			case 'StorageVaultProviders':
 			case 'PreventNewProtectedItem':
@@ -282,11 +370,13 @@ class UserPolicy {
 			case 'ModeScheduleSkipAlreadyRunning':
 			case 'ModeAdminResetPassword':
 			case 'ModeAdminViewFilenames':
+			case 'ModeRequireUserResetPassword':
 			case 'PreventDeleteSingleSnapshots':
 			case 'PreventChangeAccountPassword':
 			case 'PreventChangeEmailSettings':
 			case 'PreventChangeAccountName':
 			case 'PreventOpenAppUI':
+			case 'RequirePasswordOpenAppUI':
 			case 'HideAppImport':
 			case 'HideAppVersion':
 			case 'PreventOpenWebUI':
@@ -295,6 +385,9 @@ class UserPolicy {
 			case 'DefaultStorageVaultRetention':
 			case 'EnforceStorageVaultRetention':
 			case 'PreventProtectedItemRetention':
+			case 'DefaultSources':
+			case 'DefaultSourcesBackupRules':
+			case 'DefaultBackupRules':
 				break;
 			default:
 				$this->__unknown_properties[$k] = $v;
@@ -379,6 +472,7 @@ class UserPolicy {
 		$ret["PreventRequestStorageVault"] = $this->PreventRequestStorageVault;
 		$ret["PreventAddCustomStorageVault"] = $this->PreventAddCustomStorageVault;
 		$ret["PreventEditStorageVault"] = $this->PreventEditStorageVault;
+		$ret["HideCloudStorageBranding"] = $this->HideCloudStorageBranding;
 		$ret["PreventDeleteStorageVault"] = $this->PreventDeleteStorageVault;
 		if ( $this->StorageVaultProviders === null ) {
 			$ret["StorageVaultProviders"] = $for_json_encode ? (object)[] : [];
@@ -408,11 +502,13 @@ class UserPolicy {
 		$ret["ModeScheduleSkipAlreadyRunning"] = $this->ModeScheduleSkipAlreadyRunning;
 		$ret["ModeAdminResetPassword"] = $this->ModeAdminResetPassword;
 		$ret["ModeAdminViewFilenames"] = $this->ModeAdminViewFilenames;
+		$ret["ModeRequireUserResetPassword"] = $this->ModeRequireUserResetPassword;
 		$ret["PreventDeleteSingleSnapshots"] = $this->PreventDeleteSingleSnapshots;
 		$ret["PreventChangeAccountPassword"] = $this->PreventChangeAccountPassword;
 		$ret["PreventChangeEmailSettings"] = $this->PreventChangeEmailSettings;
 		$ret["PreventChangeAccountName"] = $this->PreventChangeAccountName;
 		$ret["PreventOpenAppUI"] = $this->PreventOpenAppUI;
+		$ret["RequirePasswordOpenAppUI"] = $this->RequirePasswordOpenAppUI;
 		$ret["HideAppImport"] = $this->HideAppImport;
 		$ret["HideAppVersion"] = $this->HideAppVersion;
 		$ret["PreventOpenWebUI"] = $this->PreventOpenWebUI;
@@ -429,6 +525,57 @@ class UserPolicy {
 		}
 		$ret["EnforceStorageVaultRetention"] = $this->EnforceStorageVaultRetention;
 		$ret["PreventProtectedItemRetention"] = $this->PreventProtectedItemRetention;
+		{
+			$c0 = [];
+			foreach($this->DefaultSources as $k0 => $v0) {
+				$ko_0 = $k0;
+				if ( $v0 === null ) {
+					$vo_0 = $for_json_encode ? (object)[] : [];
+				} else {
+					$vo_0 = $v0->toArray($for_json_encode);
+				}
+				$c0[ $ko_0 ] = $vo_0;
+			}
+			if ($for_json_encode && count($c0) == 0) {
+				$ret["DefaultSources"] = (object)[];
+			} else {
+				$ret["DefaultSources"] = $c0;
+			}
+		}
+		{
+			$c0 = [];
+			foreach($this->DefaultSourcesBackupRules as $k0 => $v0) {
+				$ko_0 = $k0;
+				if ( $v0 === null ) {
+					$vo_0 = $for_json_encode ? (object)[] : [];
+				} else {
+					$vo_0 = $v0->toArray($for_json_encode);
+				}
+				$c0[ $ko_0 ] = $vo_0;
+			}
+			if ($for_json_encode && count($c0) == 0) {
+				$ret["DefaultSourcesBackupRules"] = (object)[];
+			} else {
+				$ret["DefaultSourcesBackupRules"] = $c0;
+			}
+		}
+		{
+			$c0 = [];
+			foreach($this->DefaultBackupRules as $k0 => $v0) {
+				$ko_0 = $k0;
+				if ( $v0 === null ) {
+					$vo_0 = $for_json_encode ? (object)[] : [];
+				} else {
+					$vo_0 = $v0->toArray($for_json_encode);
+				}
+				$c0[ $ko_0 ] = $vo_0;
+			}
+			if ($for_json_encode && count($c0) == 0) {
+				$ret["DefaultBackupRules"] = (object)[];
+			} else {
+				$ret["DefaultBackupRules"] = $c0;
+			}
+		}
 		
 		// Reinstate unknown properties from future server versions
 		foreach($this->__unknown_properties as $k => $v) {
@@ -446,7 +593,7 @@ class UserPolicy {
 	 */
 	public function toJSON()
 	{
-		$arr = self::toArray(true);
+		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
@@ -462,7 +609,7 @@ class UserPolicy {
 	 */
 	public function toStdClass()
 	{
-		$arr = self::toArray(false);
+		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -14,6 +14,7 @@ namespace Comet;
  * Delete user account
  * This does not remove any storage buckets. Unused storage buckets will be cleaned up by the Constellation Role.
  * Any stored data can not be decrypted without the user profile. Misuse can cause data loss!
+ * This also allows to uninstall software from active devices under the user account
  * 
  * You must supply administrator authentication credentials to use this API.
  * This API requires the Auth Role to be enabled.
@@ -28,13 +29,22 @@ class AdminDeleteUserRequest implements \Comet\NetworkRequest {
 	protected $TargetUser = null;
 	
 	/**
+	 * Uninstall software configuration (>= 20.3.5) (optional)
+	 *
+	 * @var \Comet\UninstallConfig|null
+	 */
+	protected $UninstallConfig = null;
+	
+	/**
 	 * Construct a new AdminDeleteUserRequest instance.
 	 *
 	 * @param string $TargetUser Selected account username
+	 * @param \Comet\UninstallConfig $UninstallConfig Uninstall software configuration (>= 20.3.5) (optional)
 	 */
-	public function __construct($TargetUser)
+	public function __construct($TargetUser, UninstallConfig $UninstallConfig = null)
 	{
 		$this->TargetUser = $TargetUser;
+		$this->UninstallConfig = $UninstallConfig;
 	}
 	
 	/**
@@ -47,6 +57,11 @@ class AdminDeleteUserRequest implements \Comet\NetworkRequest {
 		return '/api/v1/admin/delete-user';
 	}
 	
+	public function Method()
+	{
+		return 'POST';
+	}
+	
 	/**
 	 * Get the POST parameters for this request.
 	 *
@@ -56,6 +71,9 @@ class AdminDeleteUserRequest implements \Comet\NetworkRequest {
 	{
 		$ret = [];
 		$ret["TargetUser"] = (string)($this->TargetUser);
+		if ($this->UninstallConfig !== null) {
+			$ret["UninstallConfig"] = $this->UninstallConfig->toJSON();
+		}
 		return $ret;
 	}
 	
@@ -85,7 +103,7 @@ class AdminDeleteUserRequest implements \Comet\NetworkRequest {
 		$isCARMDerivedType = (($decoded instanceof \stdClass) && property_exists($decoded, 'Status') && property_exists($decoded, 'Message'));
 		if ($isCARMDerivedType) {
 			$carm = \Comet\APIResponseMessage::createFromStdclass($decoded);
-			if ($carm->Status !== 200) {
+			if ($carm->Status >= 400) {
 				throw new \Exception("Error " . $carm->Status . ": " . $carm->Message);
 			}
 		}

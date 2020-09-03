@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -24,7 +24,7 @@ class AdminU2FRegistration {
 	/**
 	 * @var string
 	 */
-	public $Registration = [];
+	public $Registration = "";
 	
 	/**
 	 * Preserve unknown properties when dealing with future server versions.
@@ -140,18 +140,7 @@ class AdminU2FRegistration {
 		$ret = [];
 		$ret["Description"] = $this->Description;
 		$ret["RegisterTime"] = $this->RegisterTime;
-		{
-			$c0 = [];
-			for($i0 = 0; $i0 < count($this->Registration); ++$i0) {
-				if ( $this->Registration[$i0] === null ) {
-					$val0 = $for_json_encode ? (object)[] : [];
-				} else {
-					$val0 = $this->Registration[$i0]->toArray($for_json_encode);
-				}
-				$c0[] = $val0;
-			}
-			$ret["Registration"] = $c0;
-		}
+		$ret["Registration"] = base64_encode($this->Registration);
 		
 		// Reinstate unknown properties from future server versions
 		foreach($this->__unknown_properties as $k => $v) {
@@ -169,7 +158,7 @@ class AdminU2FRegistration {
 	 */
 	public function toJSON()
 	{
-		$arr = self::toArray(true);
+		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
@@ -185,7 +174,7 @@ class AdminU2FRegistration {
 	 */
 	public function toStdClass()
 	{
-		$arr = self::toArray(false);
+		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {

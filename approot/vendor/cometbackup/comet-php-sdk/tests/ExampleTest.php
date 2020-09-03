@@ -94,10 +94,10 @@ class ExampleTest extends \PHPUnit\Framework\TestCase {
 		// same running server instance should be faster
 
 		$data = $this->server->AdminBrandingGenerateClientLinuxgeneric();
-		$this->assertTrue( self::sizeWithinRange(strlen($data), 5, 15), "Got size ".strlen($data)." for linux-generic, expected 5-15 MB" );
+		$this->assertTrue( self::sizeWithinRange(strlen($data), 15, 20), "Got size ".strlen($data)." for linux-generic, expected 15-20 MB" );
 
 		$data = $this->server->AdminBrandingGenerateClientMacosX8664();
-		$this->assertTrue( self::sizeWithinRange(strlen($data), 10, 15), "Got size ".strlen($data)." for macos-x86_64, expected 10-15 MB" );
+		$this->assertTrue( self::sizeWithinRange(strlen($data), 15, 20), "Got size ".strlen($data)." for macos-x86_64, expected 15-20 MB" );
 
 		$data = $this->server->AdminBrandingGenerateClientWindowsAnycpuZip();
 		$this->assertTrue( self::sizeWithinRange(strlen($data), 40, 50), "Got size ".strlen($data)." for windows-anycpu-zip, expected 40-50 MB" );
@@ -134,6 +134,11 @@ class ExampleTest extends \PHPUnit\Framework\TestCase {
 		for ($i = 0; $i < 20; ++$i) { // max wait=10s
 			try {
 				$inf = $this->server->AdminMetaVersion();
+				if ($inf->ServerStartTime === $current_server_start_time) {
+					// The server hasn't restarted yet	
+					usleep(500000); // 500ms
+					continue; // suppress
+				}
 
 				$back_online = true;
 				break; // success

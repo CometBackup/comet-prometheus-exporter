@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -80,6 +80,11 @@ class AdminAccountU2fSubmitChallengeResponseRequest implements \Comet\NetworkReq
 		return '/api/v1/admin/account/u2f/submit-challenge-response';
 	}
 	
+	public function Method()
+	{
+		return 'POST';
+	}
+	
 	/**
 	 * Get the POST parameters for this request.
 	 *
@@ -122,7 +127,7 @@ class AdminAccountU2fSubmitChallengeResponseRequest implements \Comet\NetworkReq
 		$isCARMDerivedType = (($decoded instanceof \stdClass) && property_exists($decoded, 'Status') && property_exists($decoded, 'Message'));
 		if ($isCARMDerivedType) {
 			$carm = \Comet\APIResponseMessage::createFromStdclass($decoded);
-			if ($carm->Status !== 200) {
+			if ($carm->Status >= 400) {
 				throw new \Exception("Error " . $carm->Status . ": " . $carm->Message);
 			}
 		}

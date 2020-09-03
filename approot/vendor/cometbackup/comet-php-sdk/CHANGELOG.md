@@ -1,16 +1,92 @@
 # CHANGELOG
 
+## 2020-09-03 v3.7.0
+- Add definitions for B2/Wasabi direct to cloud storage
+- Add definitions for remote LDAP servers
+- Use gzip content-encoding for all response bodies
+- Update descriptions for `SEVT_META_HELLO` and `AdminMetaWebhookOptionsSet`
+- Fix an issue with submitting boolean, array, and map parameters to the Comet Server
+- Fix an issue with receiving 2xx status codes other than 200
+- Fix an issue with interpreting null parameters where an array or key-value map was expected in the response
+- Fix an issue with running the test suite against current versions of Comet Server
+- Fix an issue with not properly configuring a custom SDK User-Agent for API requests
+
+## 2020-08-24 v3.6.0
+- Based on Comet 20.8.0
+- Support new AdminGetJobLogEntries endpoint
+
+## 2020-08-05 v3.5.0
+- Based on Comet 20.6.8-rc
+- Support new feature for configuring default Protected Items and default Schedules in Policies
+- Support new Microsoft SQL Server OLE DB method type constants
+- Support new MX Direct email method constant
+- Fix an issue with wrong API name in phpdoc comment for `HybridSessionStartRequest`
+- Fix an issue with type definitions for `WebhookOptions` and for `StorageSpaceFreeInfo->UsedPercent`
+- Fix an issue with statically calling non-static methods in `toJSON` and `toStdClass` methods
+
+## 2020-07-22 v3.4.0
+- Based on Comet 20.6.6-rc
+- Support new Disk Image Protected Item type
+- Support restoring files as archive (`RESTORETYPE_FILE_ARCHIVE`) or as physical disk image (`RESTORETYPE_WINDISK`)
+- Support remotely browsing Application-Aware Writers, Exchange EDB databases, Hyper-V VMs, Disk Image drives
+- Support webhooks (configure by submitting `WebhookOption` structs to `AdminMetaWebhookOptions` APIs; webhook target will receive `StreamableEvent` by POST)
+- Support new limited permission APIs to modify server settings (`AdminMetaRemoteStorageVault`, `AdminMetaBuildConfig`, `AdminMetaBrandingConfig`)
+- Support new limited permission flags for admin user accounts (`PreventChangePassword`, `AllowEditBranding`, `AllowEditRemoteStorage`)
+- Support new `AdminDisableUserTotp` API
+- Update field definitions for `ConstellationCheckReport` data structure and its embedded data structures
+- Update description for `AdminDispatcherRequestFilesystemObjects` parameter
+- Fix an issue with incorrect data type marshalling in `AdminU2FRegistration` class `Registration` field
+
+## 2020-05-22 v3.3.0
+- Based on Comet 20.5.0
+- Support new `RequirePasswordChange` field in `UserProfileConfig`, and matching parameter on existing `AdminAddUserRequest` API
+- Support new TOTP fields in `UserProfileConfig` and corresponding new `AdminAccountValidateTotp` helper API 
+- Support new `B2` field in `StorageFreeSpaceInfo` class type
+- Support new `AdminDispatcherUninstallSoftware` API, and matching `UninstallConfig` parameter on existing `AdminDeleteUser` API
+- Support new `AdminDispatcherRequestFilesystemObjects` API
+- Support new `AdminDispatcherUpdateLoginUrl` API 
+- Support new `HideCloudStorageBranding`, `RequirePasswordOpenAppUI`, and `ModeRequireUserResetPassword` policy fields in the `UserPolicy` class type
+- Support new case-insensitive search clause operators
+- Support new `EmailAddress` parameter on `AdminPreviewUserEmailReport` API
+- Support new `OldPassword` parameter on `AdminResetUserPassword` API
+
+## 2020-03-09 v3.2.0
+- Based on Comet 20.2.1
+- Support new `AdminBrandingGenerateClientTest` and `AdminStorageFreeSpace` APIs
+- Support new `GroupPolicy.DefaultUserPolicy` field
+- Support new `OSInfo` field in both `LiveUserConnection` and `UserProfileConfig.Devices`
+
+## 2020-01-10 v3.1.0
+- Based on Comet 19.12.2-rc
+- Support new `AdminDispatcherDeleteSnapshot` and `AdminMetaSendTestEmail` APIs
+- Support new `AllowZeroFilesSuccess` property on backup job advanced options
+- Support new properties for MongoDB, FTPS, Microsoft SQL Server, Regex searches, Periodic schedules
+- Update description for Portuguese languages
+- Fix an issue with exceptions thrown from placeholder `AdminMetaResourceNew` API
+
+## 2019-08-27 v3.0.0
+- Based on Comet 19.9.0-rc
+- **BREAKING:** Change `AdminRequestStorageVault` response type to add extra parameter. This would be a backwards-compatible change if no callers are checking the exact returned object type from this function.
+- Fix spelling mistake in `AdminRequestStorageVault` API
+
+## 2019-08-20 v2.7.0
+- Based on Comet 19.6.9-rc
+- Support new `AdminAccountSessionStartAsUser` API
+- Support existing `UserWebSessionStart` / `UserWebSessionRevoke` APIs
+- Update documentation for `HybridSessionStart` API
+- Fix a cosmetic issue with inconsistent terminology for News APIs
+
 ## 2019-06-26 v2.6.0
 - Based on Comet 19.6.2
-- Support new SelfAddress parameter in AdminDispatcherUpdateSoftwareRequest API
-- Support new Scheduled Emailer properties in ServerMetaVersionInfo API
-- Support new custom options in AdminDispatcherRunBackupCustom API
-- Support new AdminDispatcherRunRestoreCustom API
-- Support new AdminMetaServerConfigNetworkInterfaces API
-- Support new JOB_STATUS_RUNNING_REVIVED status
-- Update documentation for JOB_STATUS_RUNNING_INDETERMINATE
-- Update documentation for more STOREDOBJECTYPE constants
-- Fix wrong description for AdminBrandingGenerateClientByPlatform API
+- Support new `SelfAddress` parameter in `AdminDispatcherUpdateSoftwareRequest` API
+- Support new Scheduled Emailer properties in `ServerMetaVersionInfo` API
+- Support new custom options in `AdminDispatcherRunBackupCustom` API
+- Support new `AdminDispatcherRunRestoreCustom` API
+- Support new `AdminMetaServerConfigNetworkInterfaces` API
+- Support new `JOB_STATUS_RUNNING_REVIVED` status
+- Update documentation for `JOB_STATUS_RUNNING_INDETERMINATE`
+- Update documentation for more `STOREDOBJECTYPE` constants
+- Fix wrong description for `AdminBrandingGenerateClientByPlatform` API
 
 ## 2019-04-10 v2.5.4
 - Fix an issue with `\Comet\SearchClause` class type definition

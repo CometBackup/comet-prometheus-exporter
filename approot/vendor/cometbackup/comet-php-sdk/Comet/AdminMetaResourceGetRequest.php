@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -43,6 +43,11 @@ class AdminMetaResourceGetRequest implements \Comet\NetworkRequest {
 	public function Endpoint()
 	{
 		return '/api/v1/admin/meta/resource/get';
+	}
+	
+	public function Method()
+	{
+		return 'POST';
 	}
 	
 	/**

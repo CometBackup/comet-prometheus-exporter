@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -20,6 +20,11 @@ class GroupPolicy {
 	 * @var \Comet\UserPolicy
 	 */
 	public $Policy = null;
+	
+	/**
+	 * @var boolean
+	 */
+	public $DefaultUserPolicy = false;
 	
 	/**
 	 * Preserve unknown properties when dealing with future server versions.
@@ -49,10 +54,14 @@ class GroupPolicy {
 				$this->Policy = \Comet\UserPolicy::createFromStdclass($sc->Policy);
 			}
 		}
+		if (property_exists($sc, 'DefaultUserPolicy')) {
+			$this->DefaultUserPolicy = (bool)($sc->DefaultUserPolicy);
+		}
 		foreach(get_object_vars($sc) as $k => $v) {
 			switch($k) {
 			case 'Description':
 			case 'Policy':
+			case 'DefaultUserPolicy':
 				break;
 			default:
 				$this->__unknown_properties[$k] = $v;
@@ -140,6 +149,7 @@ class GroupPolicy {
 		} else {
 			$ret["Policy"] = $this->Policy->toArray($for_json_encode);
 		}
+		$ret["DefaultUserPolicy"] = $this->DefaultUserPolicy;
 		
 		// Reinstate unknown properties from future server versions
 		foreach($this->__unknown_properties as $k => $v) {
@@ -157,7 +167,7 @@ class GroupPolicy {
 	 */
 	public function toJSON()
 	{
-		$arr = self::toArray(true);
+		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
@@ -173,7 +183,7 @@ class GroupPolicy {
 	 */
 	public function toStdClass()
 	{
-		$arr = self::toArray(false);
+		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {

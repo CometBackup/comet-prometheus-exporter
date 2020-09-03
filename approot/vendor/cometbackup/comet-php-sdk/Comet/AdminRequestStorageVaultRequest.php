@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -13,6 +13,7 @@ namespace Comet;
  * Comet Server AdminRequestStorageVault API 
  * Request a new Storage Vault on behalf of a user
  * This action does not respect the "Prevent creating new Storage Vaults (via Request)" policy setting. New Storage Vaults can be requested regardless of the policy setting.
+ * Prior to Comet 19.8.0, the response type was CometAPIResponseMessage (i.e. no DestinationID field in response).
  * 
  * You must supply administrator authentication credentials to use this API.
  * This API requires the Auth Role to be enabled.
@@ -20,7 +21,7 @@ namespace Comet;
 class AdminRequestStorageVaultRequest implements \Comet\NetworkRequest {
 	
 	/**
-	 * The user to recieve the new Storage Vault
+	 * The user to receive the new Storage Vault
 	 *
 	 * @var string
 	 */
@@ -43,7 +44,7 @@ class AdminRequestStorageVaultRequest implements \Comet\NetworkRequest {
 	/**
 	 * Construct a new AdminRequestStorageVaultRequest instance.
 	 *
-	 * @param string $TargetUser The user to recieve the new Storage Vault
+	 * @param string $TargetUser The user to receive the new Storage Vault
 	 * @param string $StorageProvider ID for the Requestable destination
 	 * @param string $SelfAddress The external URL for this server. Used to resolve conflicts (optional)
 	 */
@@ -62,6 +63,11 @@ class AdminRequestStorageVaultRequest implements \Comet\NetworkRequest {
 	public function Endpoint()
 	{
 		return '/api/v1/admin/request-storage-vault';
+	}
+	
+	public function Method()
+	{
+		return 'POST';
 	}
 	
 	/**
@@ -86,7 +92,7 @@ class AdminRequestStorageVaultRequest implements \Comet\NetworkRequest {
 	 *
 	 * @param int $responseCode HTTP response code
 	 * @param string $body HTTP response body
-	 * @return \Comet\APIResponseMessage 
+	 * @return \Comet\RequestStorageVaultResponseMessage 
 	 * @throws \Exception
 	 */
 	public static function ProcessResponse($responseCode, $body)
@@ -106,17 +112,17 @@ class AdminRequestStorageVaultRequest implements \Comet\NetworkRequest {
 		$isCARMDerivedType = (($decoded instanceof \stdClass) && property_exists($decoded, 'Status') && property_exists($decoded, 'Message'));
 		if ($isCARMDerivedType) {
 			$carm = \Comet\APIResponseMessage::createFromStdclass($decoded);
-			if ($carm->Status !== 200) {
+			if ($carm->Status >= 400) {
 				throw new \Exception("Error " . $carm->Status . ": " . $carm->Message);
 			}
 		}
 		
-		// Parse as CometAPIResponseMessage
+		// Parse as RequestStorageVaultResponseMessage
 		if (is_array($decoded) && count($decoded) === 0) {
 		// Work around edge case in json_decode--json_encode stdClass conversion
-			$ret = \Comet\APIResponseMessage::createFromStdclass(new \stdClass());
+			$ret = \Comet\RequestStorageVaultResponseMessage::createFromStdclass(new \stdClass());
 		} else {
-			$ret = \Comet\APIResponseMessage::createFromStdclass($decoded);
+			$ret = \Comet\RequestStorageVaultResponseMessage::createFromStdclass($decoded);
 		}
 		
 		return $ret;

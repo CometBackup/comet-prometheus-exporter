@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -70,6 +70,11 @@ class BackupRuleConfig {
 	 * @var boolean
 	 */
 	public $UseOnDiskIndexes = false;
+	
+	/**
+	 * @var boolean
+	 */
+	public $AllowZeroFilesSuccess = false;
 	
 	/**
 	 * @var \Comet\ScheduleConfig[]
@@ -146,6 +151,9 @@ class BackupRuleConfig {
 		if (property_exists($sc, 'UseOnDiskIndexes')) {
 			$this->UseOnDiskIndexes = (bool)($sc->UseOnDiskIndexes);
 		}
+		if (property_exists($sc, 'AllowZeroFilesSuccess')) {
+			$this->AllowZeroFilesSuccess = (bool)($sc->AllowZeroFilesSuccess);
+		}
 		if (property_exists($sc, 'Schedules')) {
 			$val_2 = [];
 			if ($sc->Schedules !== null) {
@@ -182,6 +190,7 @@ class BackupRuleConfig {
 			case 'LimitVaultSpeedBps':
 			case 'ReduceDiskConcurrency':
 			case 'UseOnDiskIndexes':
+			case 'AllowZeroFilesSuccess':
 			case 'Schedules':
 			case 'EventTriggers':
 				break;
@@ -291,6 +300,7 @@ class BackupRuleConfig {
 		$ret["LimitVaultSpeedBps"] = $this->LimitVaultSpeedBps;
 		$ret["ReduceDiskConcurrency"] = $this->ReduceDiskConcurrency;
 		$ret["UseOnDiskIndexes"] = $this->UseOnDiskIndexes;
+		$ret["AllowZeroFilesSuccess"] = $this->AllowZeroFilesSuccess;
 		{
 			$c0 = [];
 			for($i0 = 0; $i0 < count($this->Schedules); ++$i0) {
@@ -325,7 +335,7 @@ class BackupRuleConfig {
 	 */
 	public function toJSON()
 	{
-		$arr = self::toArray(true);
+		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
@@ -341,7 +351,7 @@ class BackupRuleConfig {
 	 */
 	public function toStdClass()
 	{
-		$arr = self::toArray(false);
+		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -37,6 +37,11 @@ class BackupJobAdvancedOptions {
 	public $UseOnDiskIndexes = false;
 	
 	/**
+	 * @var boolean
+	 */
+	public $AllowZeroFilesSuccess = false;
+	
+	/**
 	 * Preserve unknown properties when dealing with future server versions.
 	 *
 	 * @see BackupJobAdvancedOptions::RemoveUnknownProperties() Remove all unknown properties
@@ -68,6 +73,9 @@ class BackupJobAdvancedOptions {
 		if (property_exists($sc, 'UseOnDiskIndexes')) {
 			$this->UseOnDiskIndexes = (bool)($sc->UseOnDiskIndexes);
 		}
+		if (property_exists($sc, 'AllowZeroFilesSuccess')) {
+			$this->AllowZeroFilesSuccess = (bool)($sc->AllowZeroFilesSuccess);
+		}
 		foreach(get_object_vars($sc) as $k => $v) {
 			switch($k) {
 			case 'SkipAlreadyRunning':
@@ -75,6 +83,7 @@ class BackupJobAdvancedOptions {
 			case 'LimitVaultSpeedBps':
 			case 'ReduceDiskConcurrency':
 			case 'UseOnDiskIndexes':
+			case 'AllowZeroFilesSuccess':
 				break;
 			default:
 				$this->__unknown_properties[$k] = $v;
@@ -161,6 +170,7 @@ class BackupJobAdvancedOptions {
 		$ret["LimitVaultSpeedBps"] = $this->LimitVaultSpeedBps;
 		$ret["ReduceDiskConcurrency"] = $this->ReduceDiskConcurrency;
 		$ret["UseOnDiskIndexes"] = $this->UseOnDiskIndexes;
+		$ret["AllowZeroFilesSuccess"] = $this->AllowZeroFilesSuccess;
 		
 		// Reinstate unknown properties from future server versions
 		foreach($this->__unknown_properties as $k => $v) {
@@ -178,7 +188,7 @@ class BackupJobAdvancedOptions {
 	 */
 	public function toJSON()
 	{
-		$arr = self::toArray(true);
+		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
@@ -194,7 +204,7 @@ class BackupJobAdvancedOptions {
 	 */
 	public function toStdClass()
 	{
-		$arr = self::toArray(false);
+		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {

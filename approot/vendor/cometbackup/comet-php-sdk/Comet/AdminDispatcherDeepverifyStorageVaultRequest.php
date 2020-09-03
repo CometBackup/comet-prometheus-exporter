@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -55,6 +55,11 @@ class AdminDispatcherDeepverifyStorageVaultRequest implements \Comet\NetworkRequ
 		return '/api/v1/admin/dispatcher/deepverify-storage-vault';
 	}
 	
+	public function Method()
+	{
+		return 'POST';
+	}
+	
 	/**
 	 * Get the POST parameters for this request.
 	 *
@@ -94,7 +99,7 @@ class AdminDispatcherDeepverifyStorageVaultRequest implements \Comet\NetworkRequ
 		$isCARMDerivedType = (($decoded instanceof \stdClass) && property_exists($decoded, 'Status') && property_exists($decoded, 'Message'));
 		if ($isCARMDerivedType) {
 			$carm = \Comet\APIResponseMessage::createFromStdclass($decoded);
-			if ($carm->Status !== 200) {
+			if ($carm->Status >= 400) {
 				throw new \Exception("Error " . $carm->Status . ": " . $carm->Message);
 			}
 		}

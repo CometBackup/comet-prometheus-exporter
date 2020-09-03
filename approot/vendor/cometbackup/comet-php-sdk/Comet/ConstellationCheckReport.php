@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -10,6 +10,21 @@
 namespace Comet;
 
 class ConstellationCheckReport {
+	
+	/**
+	 * @var int
+	 */
+	public $CheckStarted = 0;
+	
+	/**
+	 * @var int
+	 */
+	public $CheckCompleted = 0;
+	
+	/**
+	 * @var \Comet\BucketUsageInfo[] An array with string keys.
+	 */
+	public $Usage = [];
 	
 	/**
 	 * Preserve unknown properties when dealing with future server versions.
@@ -28,8 +43,34 @@ class ConstellationCheckReport {
 	 */
 	protected function inflateFrom(\stdClass $sc)
 	{
+		if (property_exists($sc, 'CheckStarted')) {
+			$this->CheckStarted = (int)($sc->CheckStarted);
+		}
+		if (property_exists($sc, 'CheckCompleted')) {
+			$this->CheckCompleted = (int)($sc->CheckCompleted);
+		}
+		if (property_exists($sc, 'Usage')) {
+			$val_2 = [];
+			if ($sc->Usage !== null) {
+				foreach($sc->Usage as $k_2 => $v_2) {
+					$phpk_2 = (string)($k_2);
+					if (is_array($v_2) && count($v_2) === 0) {
+					// Work around edge case in json_decode--json_encode stdClass conversion
+						$phpv_2 = \Comet\BucketUsageInfo::createFromStdclass(new \stdClass());
+					} else {
+						$phpv_2 = \Comet\BucketUsageInfo::createFromStdclass($v_2);
+					}
+					$val_2[$phpk_2] = $phpv_2;
+				}
+			}
+			$this->Usage = $val_2;
+		}
 		foreach(get_object_vars($sc) as $k => $v) {
 			switch($k) {
+			case 'CheckStarted':
+			case 'CheckCompleted':
+			case 'Usage':
+				break;
 			default:
 				$this->__unknown_properties[$k] = $v;
 			}
@@ -110,6 +151,25 @@ class ConstellationCheckReport {
 	public function toArray($for_json_encode = false)
 	{
 		$ret = [];
+		$ret["CheckStarted"] = $this->CheckStarted;
+		$ret["CheckCompleted"] = $this->CheckCompleted;
+		{
+			$c0 = [];
+			foreach($this->Usage as $k0 => $v0) {
+				$ko_0 = $k0;
+				if ( $v0 === null ) {
+					$vo_0 = $for_json_encode ? (object)[] : [];
+				} else {
+					$vo_0 = $v0->toArray($for_json_encode);
+				}
+				$c0[ $ko_0 ] = $vo_0;
+			}
+			if ($for_json_encode && count($c0) == 0) {
+				$ret["Usage"] = (object)[];
+			} else {
+				$ret["Usage"] = $c0;
+			}
+		}
 		
 		// Reinstate unknown properties from future server versions
 		foreach($this->__unknown_properties as $k => $v) {
@@ -127,7 +187,7 @@ class ConstellationCheckReport {
 	 */
 	public function toJSON()
 	{
-		$arr = self::toArray(true);
+		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
@@ -143,7 +203,7 @@ class ConstellationCheckReport {
 	 */
 	public function toStdClass()
 	{
-		$arr = self::toArray(false);
+		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {

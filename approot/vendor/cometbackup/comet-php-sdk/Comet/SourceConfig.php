@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -113,24 +113,28 @@ class SourceConfig {
 		}
 		if (property_exists($sc, 'EngineProps')) {
 			$val_2 = [];
-			foreach($sc->EngineProps as $k_2 => $v_2) {
-				$phpk_2 = (string)($k_2);
-				$phpv_2 = (string)($v_2);
-				$val_2[$phpk_2] = $phpv_2;
+			if ($sc->EngineProps !== null) {
+				foreach($sc->EngineProps as $k_2 => $v_2) {
+					$phpk_2 = (string)($k_2);
+					$phpv_2 = (string)($v_2);
+					$val_2[$phpk_2] = $phpv_2;
+				}
 			}
 			$this->EngineProps = $val_2;
 		}
 		if (property_exists($sc, 'OverrideDestinationRetention')) {
 			$val_2 = [];
-			foreach($sc->OverrideDestinationRetention as $k_2 => $v_2) {
-				$phpk_2 = (string)($k_2);
-				if (is_array($v_2) && count($v_2) === 0) {
-				// Work around edge case in json_decode--json_encode stdClass conversion
-					$phpv_2 = \Comet\RetentionPolicy::createFromStdclass(new \stdClass());
-				} else {
-					$phpv_2 = \Comet\RetentionPolicy::createFromStdclass($v_2);
+			if ($sc->OverrideDestinationRetention !== null) {
+				foreach($sc->OverrideDestinationRetention as $k_2 => $v_2) {
+					$phpk_2 = (string)($k_2);
+					if (is_array($v_2) && count($v_2) === 0) {
+					// Work around edge case in json_decode--json_encode stdClass conversion
+						$phpv_2 = \Comet\RetentionPolicy::createFromStdclass(new \stdClass());
+					} else {
+						$phpv_2 = \Comet\RetentionPolicy::createFromStdclass($v_2);
+					}
+					$val_2[$phpk_2] = $phpv_2;
 				}
-				$val_2[$phpk_2] = $phpv_2;
 			}
 			$this->OverrideDestinationRetention = $val_2;
 		}
@@ -308,7 +312,7 @@ class SourceConfig {
 	 */
 	public function toJSON()
 	{
-		$arr = self::toArray(true);
+		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
@@ -324,7 +328,7 @@ class SourceConfig {
 	 */
 	public function toStdClass()
 	{
-		$arr = self::toArray(false);
+		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {

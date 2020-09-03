@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -25,6 +25,16 @@ class RestoreJobAdvancedOptions {
 	 * @var string
 	 */
 	public $DestPath = "";
+	
+	/**
+	 * @var string[]
+	 */
+	public $ExactDestPaths = [];
+	
+	/**
+	 * @var int
+	 */
+	public $ArchiveFormat = 0;
 	
 	/**
 	 * Preserve unknown properties when dealing with future server versions.
@@ -52,11 +62,25 @@ class RestoreJobAdvancedOptions {
 		if (property_exists($sc, 'DestPath')) {
 			$this->DestPath = (string)($sc->DestPath);
 		}
+		if (property_exists($sc, 'ExactDestPaths')) {
+			$val_2 = [];
+			if ($sc->ExactDestPaths !== null) {
+				for($i_2 = 0; $i_2 < count($sc->ExactDestPaths); ++$i_2) {
+					$val_2[] = (string)($sc->ExactDestPaths[$i_2]);
+				}
+			}
+			$this->ExactDestPaths = $val_2;
+		}
+		if (property_exists($sc, 'ArchiveFormat')) {
+			$this->ArchiveFormat = (int)($sc->ArchiveFormat);
+		}
 		foreach(get_object_vars($sc) as $k => $v) {
 			switch($k) {
 			case 'Type':
 			case 'OverwriteExistingFiles':
 			case 'DestPath':
+			case 'ExactDestPaths':
+			case 'ArchiveFormat':
 				break;
 			default:
 				$this->__unknown_properties[$k] = $v;
@@ -141,6 +165,15 @@ class RestoreJobAdvancedOptions {
 		$ret["Type"] = $this->Type;
 		$ret["OverwriteExistingFiles"] = $this->OverwriteExistingFiles;
 		$ret["DestPath"] = $this->DestPath;
+		{
+			$c0 = [];
+			for($i0 = 0; $i0 < count($this->ExactDestPaths); ++$i0) {
+				$val0 = $this->ExactDestPaths[$i0];
+				$c0[] = $val0;
+			}
+			$ret["ExactDestPaths"] = $c0;
+		}
+		$ret["ArchiveFormat"] = $this->ArchiveFormat;
 		
 		// Reinstate unknown properties from future server versions
 		foreach($this->__unknown_properties as $k => $v) {
@@ -158,7 +191,7 @@ class RestoreJobAdvancedOptions {
 	 */
 	public function toJSON()
 	{
-		$arr = self::toArray(true);
+		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
@@ -174,7 +207,7 @@ class RestoreJobAdvancedOptions {
 	 */
 	public function toStdClass()
 	{
-		$arr = self::toArray(false);
+		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {

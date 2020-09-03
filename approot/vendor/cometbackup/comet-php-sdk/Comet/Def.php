@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -94,6 +94,13 @@ class Def {
 	 * @type int
 	 */
 	const JOB_CLASSIFICATION_DEEPVERIFY = 4010;
+	
+	/**
+	 * JobClassification: Software uninstall
+	 *
+	 * @type int
+	 */
+	const JOB_CLASSIFICATION_UNINSTALL = 4011;
 	
 	/**
 	 * JobClassification: 
@@ -279,6 +286,16 @@ class Def {
 	const DESTINATIONTYPE_B2 = 1008;
 	
 	/**
+	 * @type int
+	 */
+	const DESTINATIONTYPE_LATEST = 1100;
+	
+	/**
+	 * @type int
+	 */
+	const DESTINATIONTYPE_ALL = 1101;
+	
+	/**
 	 * EmailReportType: 
 	 *
 	 * @type int
@@ -297,21 +314,26 @@ class Def {
 	 *
 	 * @type string
 	 */
-	const SEVERITY_INFO = 'I';
+	const SEVERITY_INFO = "I";
 	
 	/**
 	 * Severity: 
 	 *
 	 * @type string
 	 */
-	const SEVERITY_WARNING = 'W';
+	const SEVERITY_WARNING = "W";
 	
 	/**
 	 * Severity: 
 	 *
 	 * @type string
 	 */
-	const SEVERITY_ERROR = 'E';
+	const SEVERITY_ERROR = "E";
+	
+	/**
+	 * @type int
+	 */
+	const MONGODB_DEFAULT_PORT = 27017;
 	
 	/**
 	 * RestoreType: 
@@ -346,7 +368,56 @@ class Def {
 	 *
 	 * @type int
 	 */
+	const RESTORETYPE_PROCESS_ARCHIVE = 3;
+	
+	/**
+	 * RestoreType: 
+	 *
+	 * @type int
+	 */
+	const RESTORETYPE_WINDISK = 4;
+	
+	/**
+	 * RestoreType: 
+	 *
+	 * @type int
+	 */
+	const RESTORETYPE_FILE_ARCHIVE = 5;
+	
+	/**
+	 * RestoreType: RESTORETYPE_PROCESS_ARCHIVE
+	 *
+	 * @type int
+	 */
 	const RESTORETYPE_PROCESS_TARBALL = 3;
+	
+	/**
+	 * RestoreArchiveFormat: 
+	 *
+	 * @type int
+	 */
+	const RESTOREARCHIVEFORMAT_TAR = 0;
+	
+	/**
+	 * RestoreArchiveFormat: 
+	 *
+	 * @type int
+	 */
+	const RESTOREARCHIVEFORMAT_TARGZ = 1;
+	
+	/**
+	 * RestoreArchiveFormat: 
+	 *
+	 * @type int
+	 */
+	const RESTOREARCHIVEFORMAT_ZIP = 2;
+	
+	/**
+	 * RestoreArchiveFormat: SquashFS container
+	 *
+	 * @type int
+	 */
+	const RESTOREARCHIVEFORMAT_SQFS = 3;
 	
 	/**
 	 * RetentionMode: If this mode is set in a RetentionPolicy, then RetentionPolicy.Ranges should be ignored.
@@ -452,6 +523,27 @@ class Def {
 	const DESTINATION_SFTP_AUTHMODE_PRIVATEKEY = 2;
 	
 	/**
+	 * SSHAuthMode: 
+	 *
+	 * @type int
+	 */
+	const SSHCONNECTION_AUTHMODE__INVALID = 0;
+	
+	/**
+	 * SSHAuthMode: 
+	 *
+	 * @type int
+	 */
+	const SSHCONNECTION_AUTHMODE_PASSWORD = 1;
+	
+	/**
+	 * SSHAuthMode: n.b. change values
+	 *
+	 * @type int
+	 */
+	const SSHCONNECTION_AUTHMODE_PRIVATEKEY = 2;
+	
+	/**
 	 * @type int
 	 */
 	const SCHEDULE_FREQUENCY_LOWEST = 8010;
@@ -492,9 +584,16 @@ class Def {
 	const SCHEDULE_FREQUENCY_MONTHLY = 8014;
 	
 	/**
+	 * SecondsPast: number of seconds per period. Offset: Shunt seconds after unix epoch
+	 *
 	 * @type int
 	 */
-	const SCHEDULE_FREQUENCY_HIGHEST = 8014;
+	const SCHEDULE_FREQUENCY_PERIODIC = 8015;
+	
+	/**
+	 * @type int
+	 */
+	const SCHEDULE_FREQUENCY_HIGHEST = 8015;
 	
 	/**
 	 * 2^50 (1 << 50)
@@ -547,6 +646,44 @@ class Def {
 	 * @type string
 	 */
 	const ENGINE_BUILTIN_HYPERV = "engine1/hyperv";
+	
+	/**
+	 * @type string
+	 */
+	const ENGINE_BUILTIN_WINDISK = "engine1/windisk";
+	
+	/**
+	 * @type string
+	 */
+	const ENGINE_BUILTIN_MONGODB = "engine1/mongodb";
+	
+	/**
+	 * MSSQLAuthMode: 
+	 *
+	 * @type string
+	 */
+	const MSSQL_AUTH_WINDOWS = "windows";
+	
+	/**
+	 * MSSQLAuthMode: 
+	 *
+	 * @type string
+	 */
+	const MSSQL_AUTH_NATIVE = "native";
+	
+	/**
+	 * MSSQLMethod: 
+	 *
+	 * @type string
+	 */
+	const MSSQL_METHOD_OLEDB_NATIVE = "OLEDB_NATIVE";
+	
+	/**
+	 * MSSQLMethod: 
+	 *
+	 * @type string
+	 */
+	const MSSQL_METHOD_OLEDB_32 = "OLEDB_32";
 	
 	/**
 	 * StoredObjectType: 
@@ -682,6 +819,8 @@ class Def {
 	const SETTING_ENFORCED_OFF = 4;
 	
 	/**
+	 * sz.LanguageCode: 
+	 *
 	 * @type string
 	 */
 	const DEFAULT_LANGUAGE = "en_US";
@@ -694,27 +833,27 @@ class Def {
 	/**
 	 * @type string
 	 */
-	const APPLICATION_VERSION = "19.6.2";
+	const APPLICATION_VERSION = "20.8.0";
 	
 	/**
 	 * @type int
 	 */
-	const APPLICATION_VERSION_MAJOR = 19;
+	const APPLICATION_VERSION_MAJOR = 20;
 	
 	/**
 	 * @type int
 	 */
-	const APPLICATION_VERSION_MINOR = 6;
+	const APPLICATION_VERSION_MINOR = 8;
 	
 	/**
 	 * @type int
 	 */
-	const APPLICATION_VERSION_REVISION = 2;
+	const APPLICATION_VERSION_REVISION = 0;
 	
 	/**
 	 * @type string
 	 */
-	const RELEASE_CODENAME = "Voyager";
+	const RELEASE_CODENAME = "Jupiter";
 	
 	/**
 	 * @type int
@@ -755,6 +894,11 @@ class Def {
 	 * @type string
 	 */
 	const UnknownDeviceError = "ERR_UNKNOWN_DEVICE";
+	
+	/**
+	 * @type string
+	 */
+	const TOTPRequiredError = "ERR_TOTP_REQUIRED";
 	
 	/**
 	 * UpdateStatus: 
@@ -925,6 +1069,56 @@ class Def {
 	/**
 	 * @type string
 	 */
+	const SEARCHOPERATOR_STRING_EQ_CI = "str_eq_ci";
+	
+	/**
+	 * @type string
+	 */
+	const SEARCHOPERATOR_STRING_NEQ_CI = "str_neq_ci";
+	
+	/**
+	 * @type string
+	 */
+	const SEARCHOPERATOR_STRING_CONTAINS_CI = "str_contains_ci";
+	
+	/**
+	 * @type string
+	 */
+	const SEARCHOPERATOR_STRING_NCONTAINS_CI = "str_ncontains_ci";
+	
+	/**
+	 * @type string
+	 */
+	const SEARCHOPERATOR_STRING_STARTSWITH_CI = "str_startswith_ci";
+	
+	/**
+	 * @type string
+	 */
+	const SEARCHOPERATOR_STRING_NSTARTSWITH_CI = "str_nstartswith_ci";
+	
+	/**
+	 * @type string
+	 */
+	const SEARCHOPERATOR_STRING_ENDSWITH_CI = "str_endswith_ci";
+	
+	/**
+	 * @type string
+	 */
+	const SEARCHOPERATOR_STRING_NENDSWITH_CI = "str_nendswith_ci";
+	
+	/**
+	 * @type string
+	 */
+	const SEARCHOPERATOR_STRING_REGEXMATCH = "str_regexmatch";
+	
+	/**
+	 * @type string
+	 */
+	const SEARCHOPERATOR_STRING_NREGEXMATCH = "str_nregexmatch";
+	
+	/**
+	 * @type string
+	 */
 	const SEARCHOPERATOR_INT_EQ = "int_eq";
 	
 	/**
@@ -962,8 +1156,156 @@ class Def {
 	 */
 	const SEARCHOPERATOR_BOOL_NIS = "bool_nis";
 	
+	/**
+	 * EmailDeliveryType: 
+	 *
+	 * @type string
+	 */
+	const EMAIL_DELIVERY_NONE = "";
 	
-	/*
+	/**
+	 * EmailDeliveryType: 
+	 *
+	 * @type string
+	 */
+	const EMAIL_DELIVERY_MX_DIRECT = "builtin";
+	
+	/**
+	 * EmailDeliveryType: 
+	 *
+	 * @type string
+	 */
+	const EMAIL_DELIVERY_SMTP = "smtp";
+	
+	/**
+	 * EmailDeliveryType: 
+	 *
+	 * @type string
+	 */
+	const EMAIL_DELIVERY_SMTP_SSL = "smtp-ssl";
+	
+	/**
+	 * EmailDeliveryType: Legacy alias
+	 *
+	 * @type string
+	 */
+	const EMAIL_DELIVERY_BUILTIN = self::EMAIL_DELIVERY_MX_DIRECT ;
+	
+	/**
+	 * RemoteServerType: 
+	 *
+	 * @type string
+	 */
+	const REMOTESERVER_COMET = "comet";
+	
+	/**
+	 * RemoteServerType: 
+	 *
+	 * @type string
+	 */
+	const REMOTESERVER_LDAP = "ldap";
+	
+	/**
+	 * RemoteServerType: 
+	 *
+	 * @type string
+	 */
+	const REMOTESERVER_B2 = "b2";
+	
+	/**
+	 * RemoteServerType: 
+	 *
+	 * @type string
+	 */
+	const REMOTESERVER_WASABI = "wasabi";
+	
+	/**
+	 * @type string
+	 */
+	const LDAPSECURITYMETHOD_PLAIN = "plain";
+	
+	/**
+	 * @type string
+	 */
+	const LDAPSECURITYMETHOD_LDAPS = "ldaps";
+	
+	/**
+	 * @type string
+	 */
+	const LDAPSECURITYMETHOD_STARTTLS = "starttls";
+	
+	/**
+	 * MacOSCodesignLevel: 
+	 *
+	 * @type int
+	 */
+	const MACOSCODESIGN_LEVEL_SIGN = 0;
+	
+	/**
+	 * MacOSCodesignLevel: 
+	 *
+	 * @type int
+	 */
+	const MACOSCODESIGN_LEVEL_SIGN_NOTARISE = 1;
+	
+	/**
+	 * MacOSCodesignLevel: 
+	 *
+	 * @type int
+	 */
+	const MACOSCODESIGN_LEVEL_SIGN_NOTARISE_STAPLE = 2;
+	
+	/**
+	 * StreamableEventType: Event is emitted when the webhook is registered, or when the server starts up. The Data associated is ServerMetaVersionInfo
+	 *
+	 * @type int
+	 */
+	const SEVT_META_HELLO = 4000;
+	
+	/**
+	 * StreamableEventType: Data is the profile object
+	 *
+	 * @type int
+	 */
+	const SEVT_ACCOUNT_NEW = 4100;
+	
+	/**
+	 * StreamableEventType: Data is the username
+	 *
+	 * @type int
+	 */
+	const SEVT_ACCOUNT_REMOVED = 4101;
+	
+	/**
+	 * StreamableEventType: Data is the profile object
+	 *
+	 * @type int
+	 */
+	const SEVT_ACCOUNT_UPDATED = 4102;
+	
+	/**
+	 * StreamableEventType: 
+	 *
+	 * @type int
+	 */
+	const SEVT_JOB_NEW = 4200;
+	
+	/**
+	 * StreamableEventType: 
+	 *
+	 * @type int
+	 */
+	const SEVT_JOB_COMPLETED = 4201;
+	
+	/**
+	 * StreamableEventType: Data is the string bucket ref
+	 *
+	 * @type int
+	 */
+	const SEVT_BUCKET_NEW = 4300;
+	
+	
+	/**
 	 * Retrieve a mapping of language codes supported by Comet Server.
 	 *
 	 * @return array
@@ -977,13 +1319,11 @@ class Def {
 			'hr_HR' => 'Hrvatski',
 			'it_IT' => 'Italiano',
 			'nl_NL' => 'Nederlands',
-			'pt_BR' => 'Português (Brazil)',
-			'pt_PT' => 'Português (Europe)',
+			'pt_BR' => 'Português (Brasil)',
+			'pt_PT' => 'Português (Europa)',
 			'ru_RU' => 'Русский',
 			'he_IL' => 'עברית‬',
 		];
-		
 	}
-	
 }
 

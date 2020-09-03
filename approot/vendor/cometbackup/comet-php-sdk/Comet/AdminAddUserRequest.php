@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -40,17 +40,26 @@ class AdminAddUserRequest implements \Comet\NetworkRequest {
 	protected $StoreRecoveryCode = null;
 	
 	/**
+	 * If set to 1, require to reset password at the first login for the generated user (>= 20.3.4) (optional)
+	 *
+	 * @var int|null
+	 */
+	protected $RequirePasswordChange = null;
+	
+	/**
 	 * Construct a new AdminAddUserRequest instance.
 	 *
 	 * @param string $TargetUser New account username
 	 * @param string $TargetPassword New account password
 	 * @param int $StoreRecoveryCode If set to 1, store and keep a password recovery code for the generated user (>= 18.3.9) (optional)
+	 * @param int $RequirePasswordChange If set to 1, require to reset password at the first login for the generated user (>= 20.3.4) (optional)
 	 */
-	public function __construct($TargetUser, $TargetPassword, $StoreRecoveryCode = null)
+	public function __construct($TargetUser, $TargetPassword, $StoreRecoveryCode = null, $RequirePasswordChange = null)
 	{
 		$this->TargetUser = $TargetUser;
 		$this->TargetPassword = $TargetPassword;
 		$this->StoreRecoveryCode = $StoreRecoveryCode;
+		$this->RequirePasswordChange = $RequirePasswordChange;
 	}
 	
 	/**
@@ -61,6 +70,11 @@ class AdminAddUserRequest implements \Comet\NetworkRequest {
 	public function Endpoint()
 	{
 		return '/api/v1/admin/add-user';
+	}
+	
+	public function Method()
+	{
+		return 'POST';
 	}
 	
 	/**
@@ -75,6 +89,9 @@ class AdminAddUserRequest implements \Comet\NetworkRequest {
 		$ret["TargetPassword"] = (string)($this->TargetPassword);
 		if ($this->StoreRecoveryCode !== null) {
 			$ret["StoreRecoveryCode"] = (string)($this->StoreRecoveryCode);
+		}
+		if ($this->RequirePasswordChange !== null) {
+			$ret["RequirePasswordChange"] = (string)($this->RequirePasswordChange);
 		}
 		return $ret;
 	}
@@ -105,7 +122,7 @@ class AdminAddUserRequest implements \Comet\NetworkRequest {
 		$isCARMDerivedType = (($decoded instanceof \stdClass) && property_exists($decoded, 'Status') && property_exists($decoded, 'Message'));
 		if ($isCARMDerivedType) {
 			$carm = \Comet\APIResponseMessage::createFromStdclass($decoded);
-			if ($carm->Status !== 200) {
+			if ($carm->Status >= 400) {
 				throw new \Exception("Error " . $carm->Status . ": " . $carm->Message);
 			}
 		}

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -11,7 +11,7 @@ namespace Comet;
 
 /** 
  * Comet Server AdminGetJobLog API 
- * Get the report log entries for a single job
+ * Get the report log entries for a single job, in plaintext format
  * 
  * You must supply administrator authentication credentials to use this API.
  * This API requires the Auth Role to be enabled.
@@ -43,6 +43,11 @@ class AdminGetJobLogRequest implements \Comet\NetworkRequest {
 	public function Endpoint()
 	{
 		return '/api/v1/admin/get-job-log';
+	}
+	
+	public function Method()
+	{
+		return 'POST';
 	}
 	
 	/**

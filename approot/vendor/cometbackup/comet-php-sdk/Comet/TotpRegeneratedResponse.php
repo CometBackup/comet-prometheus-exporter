@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -32,6 +32,11 @@ class TotpRegeneratedResponse {
 	public $URL = "";
 	
 	/**
+	 * @var string
+	 */
+	public $ProfileHash = "";
+	
+	/**
 	 * Preserve unknown properties when dealing with future server versions.
 	 *
 	 * @see TotpRegeneratedResponse::RemoveUnknownProperties() Remove all unknown properties
@@ -60,12 +65,16 @@ class TotpRegeneratedResponse {
 		if (property_exists($sc, 'URL')) {
 			$this->URL = (string)($sc->URL);
 		}
+		if (property_exists($sc, 'ProfileHash')) {
+			$this->ProfileHash = (string)($sc->ProfileHash);
+		}
 		foreach(get_object_vars($sc) as $k => $v) {
 			switch($k) {
 			case 'Status':
 			case 'Message':
 			case 'Image':
 			case 'URL':
+			case 'ProfileHash':
 				break;
 			default:
 				$this->__unknown_properties[$k] = $v;
@@ -151,6 +160,7 @@ class TotpRegeneratedResponse {
 		$ret["Message"] = $this->Message;
 		$ret["Image"] = $this->Image;
 		$ret["URL"] = $this->URL;
+		$ret["ProfileHash"] = $this->ProfileHash;
 		
 		// Reinstate unknown properties from future server versions
 		foreach($this->__unknown_properties as $k => $v) {
@@ -168,7 +178,7 @@ class TotpRegeneratedResponse {
 	 */
 	public function toJSON()
 	{
-		$arr = self::toArray(true);
+		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
@@ -184,7 +194,7 @@ class TotpRegeneratedResponse {
 	 */
 	public function toStdClass()
 	{
-		$arr = self::toArray(false);
+		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {

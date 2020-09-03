@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -34,15 +34,24 @@ class AdminResetUserPasswordRequest implements \Comet\NetworkRequest {
 	protected $NewPassword = null;
 	
 	/**
+	 * Old account password (optional)
+	 *
+	 * @var string
+	 */
+	protected $OldPassword = null;
+	
+	/**
 	 * Construct a new AdminResetUserPasswordRequest instance.
 	 *
 	 * @param string $TargetUser Selected account username
 	 * @param string $NewPassword New account password
+	 * @param string $OldPassword Old account password (optional)
 	 */
-	public function __construct($TargetUser, $NewPassword)
+	public function __construct($TargetUser, $NewPassword, $OldPassword)
 	{
 		$this->TargetUser = $TargetUser;
 		$this->NewPassword = $NewPassword;
+		$this->OldPassword = $OldPassword;
 	}
 	
 	/**
@@ -55,6 +64,11 @@ class AdminResetUserPasswordRequest implements \Comet\NetworkRequest {
 		return '/api/v1/admin/reset-user-password';
 	}
 	
+	public function Method()
+	{
+		return 'POST';
+	}
+	
 	/**
 	 * Get the POST parameters for this request.
 	 *
@@ -65,6 +79,7 @@ class AdminResetUserPasswordRequest implements \Comet\NetworkRequest {
 		$ret = [];
 		$ret["TargetUser"] = (string)($this->TargetUser);
 		$ret["NewPassword"] = (string)($this->NewPassword);
+		$ret["OldPassword"] = (string)($this->OldPassword);
 		return $ret;
 	}
 	
@@ -94,7 +109,7 @@ class AdminResetUserPasswordRequest implements \Comet\NetworkRequest {
 		$isCARMDerivedType = (($decoded instanceof \stdClass) && property_exists($decoded, 'Status') && property_exists($decoded, 'Message'));
 		if ($isCARMDerivedType) {
 			$carm = \Comet\APIResponseMessage::createFromStdclass($decoded);
-			if ($carm->Status !== 200) {
+			if ($carm->Status >= 400) {
 				throw new \Exception("Error " . $carm->Status . ": " . $carm->Message);
 			}
 		}

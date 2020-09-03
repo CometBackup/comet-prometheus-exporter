@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -112,6 +112,31 @@ class UserProfileConfig {
 	public $PasswordRecovery = "";
 	
 	/**
+	 * @var boolean
+	 */
+	public $AllowPasswordLogin = false;
+	
+	/**
+	 * @var boolean
+	 */
+	public $AllowPasswordAndTOTPLogin = false;
+	
+	/**
+	 * @var int
+	 */
+	public $TOTPKeyEncryptionFormat = 0;
+	
+	/**
+	 * @var string
+	 */
+	public $TOTPKey = "";
+	
+	/**
+	 * @var boolean
+	 */
+	public $RequirePasswordChange = false;
+	
+	/**
 	 * @var int
 	 */
 	public $CreateTime = 0;
@@ -161,15 +186,17 @@ class UserProfileConfig {
 		}
 		if (property_exists($sc, 'OverrideEmailSettings')) {
 			$val_2 = [];
-			foreach($sc->OverrideEmailSettings as $k_2 => $v_2) {
-				$phpk_2 = (string)($k_2);
-				if (is_array($v_2) && count($v_2) === 0) {
-				// Work around edge case in json_decode--json_encode stdClass conversion
-					$phpv_2 = \Comet\UserCustomEmailSettings::createFromStdclass(new \stdClass());
-				} else {
-					$phpv_2 = \Comet\UserCustomEmailSettings::createFromStdclass($v_2);
+			if ($sc->OverrideEmailSettings !== null) {
+				foreach($sc->OverrideEmailSettings as $k_2 => $v_2) {
+					$phpk_2 = (string)($k_2);
+					if (is_array($v_2) && count($v_2) === 0) {
+					// Work around edge case in json_decode--json_encode stdClass conversion
+						$phpv_2 = \Comet\UserCustomEmailSettings::createFromStdclass(new \stdClass());
+					} else {
+						$phpv_2 = \Comet\UserCustomEmailSettings::createFromStdclass($v_2);
+					}
+					$val_2[$phpk_2] = $phpv_2;
 				}
-				$val_2[$phpk_2] = $phpv_2;
 			}
 			$this->OverrideEmailSettings = $val_2;
 		}
@@ -178,57 +205,65 @@ class UserProfileConfig {
 		}
 		if (property_exists($sc, 'Destinations')) {
 			$val_2 = [];
-			foreach($sc->Destinations as $k_2 => $v_2) {
-				$phpk_2 = (string)($k_2);
-				if (is_array($v_2) && count($v_2) === 0) {
-				// Work around edge case in json_decode--json_encode stdClass conversion
-					$phpv_2 = \Comet\DestinationConfig::createFromStdclass(new \stdClass());
-				} else {
-					$phpv_2 = \Comet\DestinationConfig::createFromStdclass($v_2);
+			if ($sc->Destinations !== null) {
+				foreach($sc->Destinations as $k_2 => $v_2) {
+					$phpk_2 = (string)($k_2);
+					if (is_array($v_2) && count($v_2) === 0) {
+					// Work around edge case in json_decode--json_encode stdClass conversion
+						$phpv_2 = \Comet\DestinationConfig::createFromStdclass(new \stdClass());
+					} else {
+						$phpv_2 = \Comet\DestinationConfig::createFromStdclass($v_2);
+					}
+					$val_2[$phpk_2] = $phpv_2;
 				}
-				$val_2[$phpk_2] = $phpv_2;
 			}
 			$this->Destinations = $val_2;
 		}
 		if (property_exists($sc, 'Sources')) {
 			$val_2 = [];
-			foreach($sc->Sources as $k_2 => $v_2) {
-				$phpk_2 = (string)($k_2);
-				if (is_array($v_2) && count($v_2) === 0) {
-				// Work around edge case in json_decode--json_encode stdClass conversion
-					$phpv_2 = \Comet\SourceConfig::createFromStdclass(new \stdClass());
-				} else {
-					$phpv_2 = \Comet\SourceConfig::createFromStdclass($v_2);
+			if ($sc->Sources !== null) {
+				foreach($sc->Sources as $k_2 => $v_2) {
+					$phpk_2 = (string)($k_2);
+					if (is_array($v_2) && count($v_2) === 0) {
+					// Work around edge case in json_decode--json_encode stdClass conversion
+						$phpv_2 = \Comet\SourceConfig::createFromStdclass(new \stdClass());
+					} else {
+						$phpv_2 = \Comet\SourceConfig::createFromStdclass($v_2);
+					}
+					$val_2[$phpk_2] = $phpv_2;
 				}
-				$val_2[$phpk_2] = $phpv_2;
 			}
 			$this->Sources = $val_2;
 		}
 		if (property_exists($sc, 'BackupRules')) {
 			$val_2 = [];
-			foreach($sc->BackupRules as $k_2 => $v_2) {
-				$phpk_2 = (string)($k_2);
-				if (is_array($v_2) && count($v_2) === 0) {
-				// Work around edge case in json_decode--json_encode stdClass conversion
-					$phpv_2 = \Comet\BackupRuleConfig::createFromStdclass(new \stdClass());
-				} else {
-					$phpv_2 = \Comet\BackupRuleConfig::createFromStdclass($v_2);
+			if ($sc->BackupRules !== null) {
+				foreach($sc->BackupRules as $k_2 => $v_2) {
+					$phpk_2 = (string)($k_2);
+					if (is_array($v_2) && count($v_2) === 0) {
+					// Work around edge case in json_decode--json_encode stdClass conversion
+						$phpv_2 = \Comet\BackupRuleConfig::createFromStdclass(new \stdClass());
+					} else {
+						$phpv_2 = \Comet\BackupRuleConfig::createFromStdclass($v_2);
+					}
+					$val_2[$phpk_2] = $phpv_2;
 				}
-				$val_2[$phpk_2] = $phpv_2;
 			}
 			$this->BackupRules = $val_2;
 		}
 		if (property_exists($sc, 'Devices')) {
 			$val_2 = [];
-			foreach($sc->Devices as $k_2 => $v_2) {
-				$phpk_2 = (string)($k_2);
-				if (is_array($v_2) && count($v_2) === 0) {
-				// Work around edge case in json_decode--json_encode stdClass conversion
-					$phpv_2 = \Comet\DeviceConfig::createFromStdclass(new \stdClass());
-				} else {
-					$phpv_2 = \Comet\DeviceConfig::createFromStdclass($v_2);
+			if ($sc->Devices !== null) {
+				foreach($sc->Devices as $k_2 => $v_2) {
+					$phpk_2 = (string)($k_2);
+					if (is_array($v_2) && count($v_2) === 0) {
+					// Work around edge case in json_decode--json_encode stdClass conversion
+						$phpv_2 = \Comet\DeviceConfig::createFromStdclass(new \stdClass());
+					} else {
+						$phpv_2 = \Comet\DeviceConfig::createFromStdclass($v_2);
+					}
+					$val_2[$phpk_2] = $phpv_2;
 				}
-				$val_2[$phpk_2] = $phpv_2;
 			}
 			$this->Devices = $val_2;
 		}
@@ -264,6 +299,21 @@ class UserProfileConfig {
 		if (property_exists($sc, 'PasswordRecovery')) {
 			$this->PasswordRecovery = (string)($sc->PasswordRecovery);
 		}
+		if (property_exists($sc, 'AllowPasswordLogin')) {
+			$this->AllowPasswordLogin = (bool)($sc->AllowPasswordLogin);
+		}
+		if (property_exists($sc, 'AllowPasswordAndTOTPLogin')) {
+			$this->AllowPasswordAndTOTPLogin = (bool)($sc->AllowPasswordAndTOTPLogin);
+		}
+		if (property_exists($sc, 'TOTPKeyEncryptionFormat')) {
+			$this->TOTPKeyEncryptionFormat = (int)($sc->TOTPKeyEncryptionFormat);
+		}
+		if (property_exists($sc, 'TOTPKey')) {
+			$this->TOTPKey = (string)($sc->TOTPKey);
+		}
+		if (property_exists($sc, 'RequirePasswordChange')) {
+			$this->RequirePasswordChange = (bool)($sc->RequirePasswordChange);
+		}
 		if (property_exists($sc, 'CreateTime')) {
 			$this->CreateTime = (int)($sc->CreateTime);
 		}
@@ -292,6 +342,11 @@ class UserProfileConfig {
 			case 'PasswordFormat':
 			case 'PasswordHash':
 			case 'PasswordRecovery':
+			case 'AllowPasswordLogin':
+			case 'AllowPasswordAndTOTPLogin':
+			case 'TOTPKeyEncryptionFormat':
+			case 'TOTPKey':
+			case 'RequirePasswordChange':
 			case 'CreateTime':
 			case 'CreationGUID':
 				break;
@@ -486,6 +541,11 @@ class UserProfileConfig {
 		$ret["PasswordFormat"] = $this->PasswordFormat;
 		$ret["PasswordHash"] = $this->PasswordHash;
 		$ret["PasswordRecovery"] = $this->PasswordRecovery;
+		$ret["AllowPasswordLogin"] = $this->AllowPasswordLogin;
+		$ret["AllowPasswordAndTOTPLogin"] = $this->AllowPasswordAndTOTPLogin;
+		$ret["TOTPKeyEncryptionFormat"] = $this->TOTPKeyEncryptionFormat;
+		$ret["TOTPKey"] = $this->TOTPKey;
+		$ret["RequirePasswordChange"] = $this->RequirePasswordChange;
 		$ret["CreateTime"] = $this->CreateTime;
 		$ret["CreationGUID"] = $this->CreationGUID;
 		
@@ -505,7 +565,7 @@ class UserProfileConfig {
 	 */
 	public function toJSON()
 	{
-		$arr = self::toArray(true);
+		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
@@ -521,7 +581,7 @@ class UserProfileConfig {
 	 */
 	public function toStdClass()
 	{
-		$arr = self::toArray(false);
+		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {

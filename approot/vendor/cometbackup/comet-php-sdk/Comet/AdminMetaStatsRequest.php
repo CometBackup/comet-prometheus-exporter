@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -45,6 +45,11 @@ class AdminMetaStatsRequest implements \Comet\NetworkRequest {
 		return '/api/v1/admin/meta/stats';
 	}
 	
+	public function Method()
+	{
+		return 'POST';
+	}
+	
 	/**
 	 * Get the POST parameters for this request.
 	 *
@@ -53,7 +58,7 @@ class AdminMetaStatsRequest implements \Comet\NetworkRequest {
 	public function Parameters()
 	{
 		$ret = [];
-		$ret["Simple"] = (string)($this->Simple);
+		$ret["Simple"] = ($this->Simple ? '1' : '0');
 		return $ret;
 	}
 	
@@ -83,22 +88,24 @@ class AdminMetaStatsRequest implements \Comet\NetworkRequest {
 		$isCARMDerivedType = (($decoded instanceof \stdClass) && property_exists($decoded, 'Status') && property_exists($decoded, 'Message'));
 		if ($isCARMDerivedType) {
 			$carm = \Comet\APIResponseMessage::createFromStdclass($decoded);
-			if ($carm->Status !== 200) {
+			if ($carm->Status >= 400) {
 				throw new \Exception("Error " . $carm->Status . ": " . $carm->Message);
 			}
 		}
 		
 		// Parse as map[int64]StatResult
 		$val_0 = [];
-		foreach($decoded as $k_0 => $v_0) {
-			$phpk_0 = (int)($k_0);
-			if (is_array($v_0) && count($v_0) === 0) {
-			// Work around edge case in json_decode--json_encode stdClass conversion
-				$phpv_0 = \Comet\StatResult::createFromStdclass(new \stdClass());
-			} else {
-				$phpv_0 = \Comet\StatResult::createFromStdclass($v_0);
+		if ($decoded !== null) {
+			foreach($decoded as $k_0 => $v_0) {
+				$phpk_0 = (int)($k_0);
+				if (is_array($v_0) && count($v_0) === 0) {
+				// Work around edge case in json_decode--json_encode stdClass conversion
+					$phpv_0 = \Comet\StatResult::createFromStdclass(new \stdClass());
+				} else {
+					$phpv_0 = \Comet\StatResult::createFromStdclass($v_0);
+				}
+				$val_0[$phpk_0] = $phpv_0;
 			}
-			$val_0[$phpk_0] = $phpv_0;
 		}
 		$ret = $val_0;
 		

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -34,6 +34,11 @@ class AdminRequestStorageVaultProvidersRequest implements \Comet\NetworkRequest 
 	public function Endpoint()
 	{
 		return '/api/v1/admin/request-storage-vault-providers';
+	}
+	
+	public function Method()
+	{
+		return 'POST';
 	}
 	
 	/**
@@ -73,17 +78,19 @@ class AdminRequestStorageVaultProvidersRequest implements \Comet\NetworkRequest 
 		$isCARMDerivedType = (($decoded instanceof \stdClass) && property_exists($decoded, 'Status') && property_exists($decoded, 'Message'));
 		if ($isCARMDerivedType) {
 			$carm = \Comet\APIResponseMessage::createFromStdclass($decoded);
-			if ($carm->Status !== 200) {
+			if ($carm->Status >= 400) {
 				throw new \Exception("Error " . $carm->Status . ": " . $carm->Message);
 			}
 		}
 		
 		// Parse as map[string]string
 		$val_0 = [];
-		foreach($decoded as $k_0 => $v_0) {
-			$phpk_0 = (string)($k_0);
-			$phpv_0 = (string)($v_0);
-			$val_0[$phpk_0] = $phpv_0;
+		if ($decoded !== null) {
+			foreach($decoded as $k_0 => $v_0) {
+				$phpk_0 = (string)($k_0);
+				$phpv_0 = (string)($v_0);
+				$val_0[$phpk_0] = $phpv_0;
+			}
 		}
 		$ret = $val_0;
 		

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -30,6 +30,11 @@ class LiveUserConnection {
 	 * @var string
 	 */
 	public $ReportedPlatform = "";
+	
+	/**
+	 * @var \Comet\OSInfo
+	 */
+	public $ReportedPlatformVersion = null;
 	
 	/**
 	 * @var string
@@ -75,6 +80,14 @@ class LiveUserConnection {
 		if (property_exists($sc, 'ReportedPlatform')) {
 			$this->ReportedPlatform = (string)($sc->ReportedPlatform);
 		}
+		if (property_exists($sc, 'ReportedPlatformVersion')) {
+			if (is_array($sc->ReportedPlatformVersion) && count($sc->ReportedPlatformVersion) === 0) {
+			// Work around edge case in json_decode--json_encode stdClass conversion
+				$this->ReportedPlatformVersion = \Comet\OSInfo::createFromStdclass(new \stdClass());
+			} else {
+				$this->ReportedPlatformVersion = \Comet\OSInfo::createFromStdclass($sc->ReportedPlatformVersion);
+			}
+		}
 		if (property_exists($sc, 'IPAddress')) {
 			$this->IPAddress = (string)($sc->IPAddress);
 		}
@@ -90,6 +103,7 @@ class LiveUserConnection {
 			case 'DeviceID':
 			case 'ReportedVersion':
 			case 'ReportedPlatform':
+			case 'ReportedPlatformVersion':
 			case 'IPAddress':
 			case 'ConnectionTime':
 			case 'AllowsFilenames':
@@ -178,6 +192,11 @@ class LiveUserConnection {
 		$ret["DeviceID"] = $this->DeviceID;
 		$ret["ReportedVersion"] = $this->ReportedVersion;
 		$ret["ReportedPlatform"] = $this->ReportedPlatform;
+		if ( $this->ReportedPlatformVersion === null ) {
+			$ret["ReportedPlatformVersion"] = $for_json_encode ? (object)[] : [];
+		} else {
+			$ret["ReportedPlatformVersion"] = $this->ReportedPlatformVersion->toArray($for_json_encode);
+		}
 		$ret["IPAddress"] = $this->IPAddress;
 		$ret["ConnectionTime"] = $this->ConnectionTime;
 		$ret["AllowsFilenames"] = $this->AllowsFilenames;
@@ -198,7 +217,7 @@ class LiveUserConnection {
 	 */
 	public function toJSON()
 	{
-		$arr = self::toArray(true);
+		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
@@ -214,7 +233,7 @@ class LiveUserConnection {
 	 */
 	public function toStdClass()
 	{
-		$arr = self::toArray(false);
+		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {
@@ -230,6 +249,9 @@ class LiveUserConnection {
 	public function RemoveUnknownProperties()
 	{
 		$this->__unknown_properties = [];
+		if ($this->ReportedPlatformVersion !== null) {
+			$this->ReportedPlatformVersion->RemoveUnknownProperties();
+		}
 	}
 	
 }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -20,6 +20,11 @@ class ScheduleConfig {
 	 * @var int
 	 */
 	public $SecondsPast = 0;
+	
+	/**
+	 * @var int
+	 */
+	public $Offset = 0;
 	
 	/**
 	 * Preserve unknown properties when dealing with future server versions.
@@ -44,10 +49,14 @@ class ScheduleConfig {
 		if (property_exists($sc, 'SecondsPast')) {
 			$this->SecondsPast = (int)($sc->SecondsPast);
 		}
+		if (property_exists($sc, 'Offset')) {
+			$this->Offset = (int)($sc->Offset);
+		}
 		foreach(get_object_vars($sc) as $k => $v) {
 			switch($k) {
 			case 'FrequencyType':
 			case 'SecondsPast':
+			case 'Offset':
 				break;
 			default:
 				$this->__unknown_properties[$k] = $v;
@@ -131,6 +140,7 @@ class ScheduleConfig {
 		$ret = [];
 		$ret["FrequencyType"] = $this->FrequencyType;
 		$ret["SecondsPast"] = $this->SecondsPast;
+		$ret["Offset"] = $this->Offset;
 		
 		// Reinstate unknown properties from future server versions
 		foreach($this->__unknown_properties as $k => $v) {
@@ -148,7 +158,7 @@ class ScheduleConfig {
 	 */
 	public function toJSON()
 	{
-		$arr = self::toArray(true);
+		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
@@ -164,7 +174,7 @@ class ScheduleConfig {
 	 */
 	public function toStdClass()
 	{
-		$arr = self::toArray(false);
+		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -14,5 +14,7 @@ interface NetworkRequest {
 	public function Parameters();
 
 	public function Endpoint();
+
+	public function Method();
 
 }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2019 Comet Licensing Ltd.
+ * Copyright (c) 2018-2020 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -91,6 +91,11 @@ class AdminDispatcherRunRestoreRequest implements \Comet\NetworkRequest {
 		return '/api/v1/admin/dispatcher/run-restore';
 	}
 	
+	public function Method()
+	{
+		return 'POST';
+	}
+	
 	/**
 	 * Get the POST parameters for this request.
 	 *
@@ -107,7 +112,16 @@ class AdminDispatcherRunRestoreRequest implements \Comet\NetworkRequest {
 			$ret["Snapshot"] = (string)($this->Snapshot);
 		}
 		if ($this->Paths !== null) {
-			$ret["Paths"] = (string)($this->Paths);
+			{
+				$c0 = [];
+				for($i0 = 0; $i0 < count($this->Paths); ++$i0) {
+					$val0 = $this->Paths[$i0];
+					
+					$c0[] = $val0;
+				}
+				$ret["Paths"] = json_encode($c0);
+			}
+			
 		}
 		return $ret;
 	}
@@ -138,7 +152,7 @@ class AdminDispatcherRunRestoreRequest implements \Comet\NetworkRequest {
 		$isCARMDerivedType = (($decoded instanceof \stdClass) && property_exists($decoded, 'Status') && property_exists($decoded, 'Message'));
 		if ($isCARMDerivedType) {
 			$carm = \Comet\APIResponseMessage::createFromStdclass($decoded);
-			if ($carm->Status !== 200) {
+			if ($carm->Status >= 400) {
 				throw new \Exception("Error " . $carm->Status . ": " . $carm->Message);
 			}
 		}
