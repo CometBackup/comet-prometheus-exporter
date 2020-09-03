@@ -36,7 +36,7 @@ class CometPrometheusExporter {
     /**
      * Construct a new CometPrometheusExporter instance
      */
-    public function __construct($comet_server_url, $comet_admin_username, $comet_admin_password)
+    public function __construct(string $comet_server_url, string $comet_admin_username, string $comet_admin_password)
     { 
         $this->cs = new \Comet\Server($comet_server_url, $comet_admin_username, $comet_admin_password);
         $this->registry = new \Prometheus\CollectorRegistry(new \Prometheus\Storage\InMemory());
