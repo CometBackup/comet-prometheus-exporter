@@ -62,13 +62,16 @@ This exporter produces the following metrics:
 
 - `cometserver_api_lookup_duration` (Gauge)
     - The time required to retrieve data from the Comet Server (ms)
+
+### (Auth Role) Aggregate information
+
 - `cometserver_users_total` (Gauge)
     - Total number of users on this Comet Server
 - `cometserver_recentjobs_total` (Gauge)
     - Labels: `status`
     - Total number of jobs in the last 24 hours
 
-### Per-device
+### (Auth Role) Per-device
 
 - `cometserver_device_is_current` (Gauge)
     - Labels: `username`, `device_id`, `device_name`
@@ -77,7 +80,7 @@ This exporter produces the following metrics:
     - Labels: `username`, `device_id`, `device_name`
     - The online/offline status of each registered device
 
-### Last backup job
+### (Auth Role) Last backup job
 
 - `cometserver_lastbackup_download_size_bytes` (Gauge)
     - Labels: `username`, `protected_item_id`, `protected_item_name`, `device_id`, `device_name`
@@ -101,7 +104,7 @@ This exporter produces the following metrics:
     - Labels: `username`, `protected_item_id`, `protected_item_name`, `device_id`, `device_name`
     - The size (bytes) uploaded during most recent completed backup job for this Protected Item
 
-### Per-Storage Vault
+### (Auth Role) Per-Storage Vault
 
 - `cometserver_storagevault_size_bytes` (Gauge)
     - Labels: `username`, `vault_id`, `vault_name`, `vault_type`
@@ -109,3 +112,20 @@ This exporter produces the following metrics:
 - `cometserver_storagevault_quota_bytes` (Gauge)
     - Labels: `username`, `vault_id`, `vault_name`, `vault_type`
     - The quota limit for each Storage Vault, if one is set
+
+### (Storage Role) Aggregate information
+
+- `cometserver_storagerole_buckets_total` (Gauge)
+    - The total number of Storage Role buckets on this Comet Server
+
+### Server Self-Backup
+
+- `cometserver_selfbackup_time_since` (Gauge)
+    - Labels: `selfbackup_index`
+    - The time since this Server Self-Backup configuration last ran
+- `cometserver_selfbackup_filesize` (Gauge)
+    - Labels: `selfbackup_index`
+    - The generated file size of the last Server Self-Backup job
+- `cometserver_selfbackup_success` (Gauge)
+    - Labels: `selfbackup_index`
+    - Whether the most recent Server Self-Backup job was successful (1/0)
