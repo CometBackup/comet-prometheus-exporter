@@ -54,21 +54,25 @@ class CometPrometheusExporter {
         $api_requests_start_time = microtime(true);
         {
             $serverinfo = $this->cs->AdminMetaVersion();
-            $users = $this->cs->AdminListUsersFull();
-            $online_devices = $this->cs->AdminDispatcherListActive();
-            $recentjobs = $this->cs->AdminGetJobsForDateRange(time() - 86400, time()); // Jobs with a runtime intersecting the last 24 hours
+            if ($serverinfo->AuthenticationRole) {
+                $users = $this->cs->AdminListUsersFull();
+                $online_devices = $this->cs->AdminDispatcherListActive();
+                $recentjobs = $this->cs->AdminGetJobsForDateRange(time() - 86400, time()); // Jobs with a runtime intersecting the last 24 hours
+            }
         }
         $api_requests_end_time = microtime(true);
 
         // Convert API responses to our Prometheus metrics
 
         $this->addRequestTimeMetric($api_requests_start_time, $api_requests_end_time);
-        $this->addTotalUsersMetric($users);
-        $this->addStorageVaultMetrics($users);
-        $this->addLastBackupMetrics($users);
-        $this->addRecentJobsMetrics($recentjobs);
-        $this->addOnlineStatusMetrics($users, $online_devices);
-        $this->addDeviceIsCurrentMetrics($users, $online_devices, $serverinfo);
+        if ($serverinfo->AuthenticationRole) {
+            $this->addTotalUsersMetric($users);
+            $this->addStorageVaultMetrics($users);
+            $this->addLastBackupMetrics($users);
+            $this->addRecentJobsMetrics($recentjobs);
+            $this->addOnlineStatusMetrics($users, $online_devices);
+            $this->addDeviceIsCurrentMetrics($users, $online_devices, $serverinfo);
+        }
         
         // Render result
 
