@@ -79,6 +79,7 @@ class CometPrometheusExporter {
         if ($serverinfo->StorageRole) {
             $this->addTotalSRBucketsMetric($storagerole_buckets);
         }
+        $this->addSelfBackupsMetric($api_requests_end_time, $serverinfo->SelfBackup);
         
         // Render result
 
@@ -135,6 +136,55 @@ class CometPrometheusExporter {
             'The total number of Storage Role buckets on this Comet Server'
         );
         $storagerole_buckets_total_gauge->set(count($storagerole_buckets));
+    }
+
+    /**
+     * Register metric
+     * Properties of the most recent Server Self-Backup jobs
+     *
+     * @param int $now Time to compare against
+     * @param \Comet\SelfBackupStatistics[] $sb_stats Result of AdminMetaVersion API call
+     * @return void
+     */
+    public function addSelfBackupsMetric(int $now, array $sb_stats): void { 
+
+        $selfbackup_time_since = $this->registry->registerGauge(
+            'cometserver',
+            'selfbackup_time_since',
+            'The time since this Server Self-Backup configuration last ran',
+            [ 'selfbackup_index' ]
+        );
+
+        $selfbackup_filesize = $this->registry->registerGauge(
+            'cometserver',
+            'selfbackup_filesize',
+            'The generated file size of the last Server Self-Backup job',
+            [ 'selfbackup_index' ]
+        );
+
+        $selfbackup_success = $this->registry->registerGauge(
+            'cometserver',
+            'selfbackup_success',
+            'Whether the most recent Server Self-Backup job was successful (1/0)',
+            [ 'selfbackup_index' ]
+        );
+
+        foreach($sb_stats as $i => $sb_stat) {
+            $selfbackup_time_since->set(
+                ($sb_stat->LastRunEnd > 0)
+                    ? ($now - $sb_stat->LastRunEnd)
+                    : -1,
+                [$i]
+            );
+            $selfbackup_filesize->set(
+                $sb_stat->LastRunSize,
+                [$i]
+            );
+            $selfbackup_success->set(
+                $sb_stat->LastRunSuccess ? 1 : 0,
+                [$i]
+            );
+        }
     }
 
     /**
