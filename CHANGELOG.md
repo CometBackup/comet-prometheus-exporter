@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.6.0 (2022-08-19)
+
+- Feature: Add new `selfbackup_*` and `storagerole_buckets_total` metrics
+- Update dependencies (PHP 8.0, comet-php-sdk v4.1.0)
+- Fix an issue with requesting data from a server that does not have Auth Role enabled
+
 ## v0.5.2 (2020-09-03)
 
 - Update dependencies
