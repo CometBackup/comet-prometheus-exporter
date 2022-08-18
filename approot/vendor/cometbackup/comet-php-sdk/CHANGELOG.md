@@ -1,5 +1,162 @@
 # CHANGELOG
 
+## 2022-07-27 v4.1.0
+- Based on 22.6.7
+  Add support enforcing the `RandomDelaySecs` for both whole-server and in policies
+- Add support for username filter parameter in `AdminDispatcherListActive`
+- Add custom region parameters for S3-compatible storage
+- Add IDrive e2 as a Storage Template provider and in Constellation, including access-key cleanup
+- Add `OverwriteIfNewer` to `RestoreJobAdvancedOptions`
+- Add Office365 User Principal names
+
+## 2022-06-28 v4.0.0
+- Based on 22.6.2
+- **BREAKING:** Add support for PHP 7 return type declarations and scalar argument types. PHP 7.0 is now the minimum required PHP version
+- **BREAKING:** Remove deprecated `::createFrom()` methods, deprecated since SDK 3.0.0. Callers should switch to `createFromArray` (drop-in compatible, but with known issues for server round-trips) or `createFromStdclass`
+- **BREAKING:** The `Organization::Email` class member is now declared as `EmailOptions` type instead of `AdminEmailOptions`. This change is fully backward-compatible on the HTTP/JSON level, but may cause issues if your application code checked this type explicitly
+- **BREAKING:** The `AdminOrganizationDeleteRequest` API's response type has changed to be `APIResponseMessage`, not `OrganizationResponse`. The Comet Server API had only ever filled in the `APIResponseMessage`-compatible fields of the `OrganizationResponse` structure, so the HTTP/JSON response is unchanged, but this may cause issues if your application code checked this type explicitly
+- "Requestable" Storage Vaults have been renamed to "Storage Templates". The API endpoint is unchanged, so this is backward-compatible with older Comet Server instances
+- Document all `ServerConfigOptions` types for the `AdminMetaServerConfigSet` and `AdminMetaServerConfigGet` APIs
+- Add new `FallbackServers` option for LDAP external authentication sources
+- Add new `RandomDelaySecs` option for job schedules
+
+## 2022-06-03 v3.25.0
+- Based on 22.5.0
+- Add support for AWS Virtual Storage Roles
+- Add `$TargetOrganization` to some API methods to support cross-tenant actions
+- Add `RESTOREARCHIVEFORMAT_TARZSTD` for tar.zst archive restore format
+- Add `COMPRESS_*` Server Self-Backup compression settings
+- Add zh-TW language
+
+## 2022-05-25 v3.24.0
+- Based on 22.3.7
+- Add new `REMOTESERVER_S3_GENERIC` `RemoteServerType`
+- Add new `S3GenericVirtualStorageRole` support to the `RemoteServerAddress`
+
+## 2022-05-10 v3.23.0
+- Based on 22.3.5
+- Add new `RestrictRuntime`, `FromTime`, `ToTime`, `RestrictDays`, `DaysSelect` types to ScheduleConfig to add time and day restrictions in a hourly schedule.
+- Add new `TotalVmCount` to `BackupJobDetail` API.
+- Add new fields to `MacOSCodeSignProperties` to support code signing.
+
+## 2022-03-21 v3.22.0
+- Based on 22.3.0
+- Add new `ForceUpgradeRunning`, `ApplyDeviceFilter`, and `DeviceFilter` fields to `UpdateCampaign` types to support sending a bulk upgrade to a custom query of users
+
+## 2022-03-21 v3.21.0
+- Based on 22.2.0
+- Add new `AdminBrandingGenerateClientSpkDsm6` and `AdminBrandingGenerateClientSpkDsm7` APIs and associated types for generating and downloading Synology SPKs
+- Add new `PathAppIconImage` field to branding options types to support branding of the app icon when installed in Synology's Package Center (and other software managers)
+- Add new constants for VMDK single file restore
+- Fix an issue with serialization of types which include BASE64-ed byte array fields
+
+## 2022-01-28 v3.20.0
+- Based on 21.12.4
+- Add `AdminStoragePingDestination` API to perform a server-side Test Connections action when configuring Storage Role
+- Add `DestinationSize*` on `BackupJobDetail` struct, to track Storage Vault size measurements taken as part of jobs
+- Add `HasLicense` on `Office365MixedVirtualAccount` struct, and add `TotalLicensedMailsCount` and `TotalUnlicensedMailsCount` on `BackupJobDetail` struct, to track Office 365 license usage
+- Add `AdminWebAuthnRegistration` new `Type` field and `WEBAUTHN_DEVICE_TYPE` constants, to determine the type of hardware WebAuthn device
+- Add deprecation comments to U2F types (use WebAuthn instead), to `B2DestinationLocation.MaxConnections`, and to `Office365CustomSetting` (use Office365CustomSettingV2 instead)
+- Fix an issue with wrong array types in `WebAuthnPublicKeyCredentialCreationOptions` and `WebAuthnPublicKeyCredentialRequestOptions`
+- Fix an issue with executable permissions on some files
+
+## 2021-12-22 v3.19.0
+- Based on 21.12.1
+- Add `AdminAccountWebauthnRegistration` endpoint for new WebAuthn support.
+- Deprecate `AdminAccountU2fSubmitChallenge` as U2F is ending browser support in February 2022.
+
+## 2021-11-24 v3.18.0
+- Based on 21.9.12
+- Add support for Thai and Danish localizations
+- Add From and To fields to the EmailReportGenerated API
+- Add `AdminDispatcherEmailPreview` api method for requesting the HTML content of an email
+- Add `ImageEtag` field to the response of the ServerMetaBrandingProperties endpoint.
+- Add support for new engine properties on the Office365 backup type.
+- Add `AdminDispatcherOffice365ListVirtualAccounts` api method for requesting Objects that Office365 is capable of backing up.
+
+## 2021-10-21 v3.17.0
+- Based on 21.9.7
+- Add Support for HideFiles parameter in B2 Destination Locations
+- Add support for RegistrationTime to the DeviceConfig
+- Upgrade MYSQL to support new TLS connection options
+- Add support for new API: AdminMetaReadAllLogsRequest and AdminDispatcherRequestWindiskSnapshot
+
+## 2021-09-14 v3.16.0
+- Based on Comet 21.9.2
+- Support new `CustomHeaders` option on the `WebhookOption` class for specifying custom HTTP headers
+  to be sent in webhook POST requests from Comet Server
+
+## 2021-09-08 v3.15.0
+- Based on Comet 21.9.1
+- Support new device_timezone field on the DeviceConfig class.
+- Add admin_dispatcher_ping_destination api method
+- Add support for new retention range type constants: RETENTIONRANGE_LAST_X_BACKUPS_ONE_FOR_EACH_DAY
+- Add support for new retention range type constants: RETENTIONRANGE_LAST_X_BACKUPS_ONE_FOR_EACH_WEEK
+- Add support for new retention range type constants: RETENTIONRANGE_LAST_X_BACKUPS_ONE_FOR_EACH_MONTH
+- Add support for Microsoft Office 365 Sharepoiint constant STOREDOBJECTTYPE_MSSITELISTDRIVEENTITY
+- Add Microsoft Office 365 Region cloud region constants OFFICE_365_REGION_PUBLIC
+- Add Microsoft Office 365 Region cloud region constants OFFICE_365_REGION_CHINA
+- Add Microsoft Office 365 Region cloud region constants OFFICE_365_REGION_GERMANY
+- Add Microsoft Office 365 Region cloud region constants OFFICE_365_REGION_US_GOVT
+- Add Microsoft Office 365 Region cloud region constants OFFICE_365_REGION_US_DOD
+
+## 2021-07-01 v3.14.0
+- Based on Comet 21.6.6
+- Support new `DefaultSourceWithOSRestriction` and `LastSuccessfulBackupJob` fields
+- Support custom credentials when performing a cloud Office 365 restore job
+- Support identifying Microsoft Teams folders inside a Sharepoint backup job
+- Document the `SourceIncludePattern` structure used for `PINCLUDE`/`RINCLUDE` rules in a File-type `EngineProps` array
+- Document existing `BrandingProps` endpoint
+
+## 2021-05-25 v3.13.0
+- Based on Comet 21.6.1
+- Add new APIs to remotely browse MySQL, MongoDB, MSSQL database servers
+- Add Microsoft Office 365 properties on BackupJobDetail and on StoredObject
+- Add Microsoft Office 365 browsing APIs
+- Add Microsoft Office 365 Engine definition (`ENGINE_BUILTIN_MSOFFICE`) and associated `EngineProp` data structure definitions
+- Add `AdminDispatcherRegisterOfficeApplication` APIs
+- Add `RESTORETYPE_OFFICE365_CLOUD` constant
+- Support suspending organizations
+- Support reading the Server Self-Backup status
+- Support new `PathMenuBarIcnsFile` branding option for Comet Backup on macOS
+- Add more detailed description for `AdminDispatcherRequestStoredObjects`
+- Add defensive null checks when parsing fields that may be omitted
+
+## 2021-03-03 v3.12.0
+- Based on Comet 21.2.1
+- Support restoring files to original paths
+- Support the new "Custom" requestable Storage Vault provider type and its `CustomRemoteBucketSettings` structure
+- Support new `SpanUseStaticSlots` attribute
+- Fix missing fields in `ExternalLDAPAuthenticationSourceSettings` structure
+- Fix broken `AdminDispatcherRequestFilesystemObjects` that was parsing into the wrong response type
+
+## 2020-11-24 v3.11.0
+- Based on Comet 20.11.0
+- Support new `AdminDispatcherDeleteSnapshots` API for deleting multiple snapshots in a single step
+- Support `AdminMetaResourceNew` API using multipart request
+- Support `setLanguage()` to request translated error messages and status codes
+- Fix an issue with expected filesizes unit tests for downloading software versions
+- Fix a cosmetic issue with capitalization in AdminMetaResourceNewRequest API description
+
+## 2020-11-05 v3.10.0
+- Based on Comet 20.9.10
+- Support new `ThawExec` feature
+
+## 2020-10-08 v3.9.0
+- Based on Comet 20.9.6
+- Support new `AdminStorageBucketProperties` API
+- Allow passing in null or no value for `AdminStorageFreeSpace` parameter
+
+## 2020-09-16 v3.8.0
+- Based on Comet 20.9.1
+- Support `SetTOTPCode` function, to authenticate against Comet Server with a temporary 6-digit TOTP code
+- Support new Organization feature
+- Support new `AdminCreateInstallTokenRequest` API
+- Support new Admin user management APIs
+- Support new `RebrandStorage` property on Storage Vaults and on Requestable destination targets
+- Fix an issue with incorrect type marshalling in `StorageFreeSpaceInfo.UsedPercent`
+- Remove some unnecessary null checks and constant comparisons when submitting an API parameter containing object data
+
 ## 2020-09-03 v3.7.0
 - Add definitions for B2/Wasabi direct to cloud storage
 - Add definitions for remote LDAP servers

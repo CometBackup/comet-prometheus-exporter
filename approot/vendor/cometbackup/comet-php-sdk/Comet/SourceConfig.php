@@ -1,66 +1,71 @@
 <?php
 
 /**
- * Copyright (c) 2018-2020 Comet Licensing Ltd.
+ * Copyright (c) 2018-2022 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
- * 
+ *
  * SPDX-License-Identifier: MIT
  */
 
 namespace Comet;
 
 class SourceConfig {
-	
+
 	/**
 	 * @var string
 	 */
 	public $Engine = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $Description = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $OwnerDevice = "";
-	
+
 	/**
 	 * @var int
 	 */
 	public $CreateTime = 0;
-	
+
 	/**
 	 * @var int
 	 */
 	public $ModifyTime = 0;
-	
+
 	/**
 	 * @var string[]
 	 */
 	public $PreExec = [];
-	
+
+	/**
+	 * @var string[]
+	 */
+	public $ThawExec = [];
+
 	/**
 	 * @var string[]
 	 */
 	public $PostExec = [];
-	
+
 	/**
 	 * @var string[] An array with string keys.
 	 */
 	public $EngineProps = [];
-	
+
 	/**
 	 * @var \Comet\RetentionPolicy[] An array with string keys.
 	 */
 	public $OverrideDestinationRetention = [];
-	
+
 	/**
 	 * @var \Comet\SourceStatistics
 	 */
 	public $Statistics = null;
-	
+
 	/**
 	 * Preserve unknown properties when dealing with future server versions.
 	 *
@@ -68,7 +73,7 @@ class SourceConfig {
 	 * @var array
 	 */
 	private $__unknown_properties = [];
-	
+
 	/**
 	 * Replace the content of this SourceConfig object from a PHP \stdClass.
 	 * The data could be supplied from an API call after json_decode(...); or generated manually.
@@ -102,6 +107,15 @@ class SourceConfig {
 			}
 			$this->PreExec = $val_2;
 		}
+		if (property_exists($sc, 'ThawExec')) {
+			$val_2 = [];
+			if ($sc->ThawExec !== null) {
+				for($i_2 = 0; $i_2 < count($sc->ThawExec); ++$i_2) {
+					$val_2[] = (string)($sc->ThawExec[$i_2]);
+				}
+			}
+			$this->ThawExec = $val_2;
+		}
 		if (property_exists($sc, 'PostExec')) {
 			$val_2 = [];
 			if ($sc->PostExec !== null) {
@@ -122,7 +136,7 @@ class SourceConfig {
 			}
 			$this->EngineProps = $val_2;
 		}
-		if (property_exists($sc, 'OverrideDestinationRetention')) {
+		if (property_exists($sc, 'OverrideDestinationRetention') && !is_null($sc->OverrideDestinationRetention)) {
 			$val_2 = [];
 			if ($sc->OverrideDestinationRetention !== null) {
 				foreach($sc->OverrideDestinationRetention as $k_2 => $v_2) {
@@ -138,7 +152,7 @@ class SourceConfig {
 			}
 			$this->OverrideDestinationRetention = $val_2;
 		}
-		if (property_exists($sc, 'Statistics')) {
+		if (property_exists($sc, 'Statistics') && !is_null($sc->Statistics)) {
 			if (is_array($sc->Statistics) && count($sc->Statistics) === 0) {
 			// Work around edge case in json_decode--json_encode stdClass conversion
 				$this->Statistics = \Comet\SourceStatistics::createFromStdclass(new \stdClass());
@@ -154,6 +168,7 @@ class SourceConfig {
 			case 'CreateTime':
 			case 'ModifyTime':
 			case 'PreExec':
+			case 'ThawExec':
 			case 'PostExec':
 			case 'EngineProps':
 			case 'OverrideDestinationRetention':
@@ -164,20 +179,20 @@ class SourceConfig {
 			}
 		}
 	}
-	
+
 	/**
 	 * Coerce a stdClass into a new strongly-typed SourceConfig object.
 	 *
 	 * @param \stdClass $sc Object data as stdClass
 	 * @return SourceConfig
 	 */
-	public static function createFromStdclass(\stdClass $sc)
+	public static function createFromStdclass(\stdClass $sc): \Comet\SourceConfig
 	{
 		$retn = new SourceConfig();
 		$retn->inflateFrom($sc);
 		return $retn;
 	}
-	
+
 	/**
 	 * Coerce a plain PHP array into a new strongly-typed SourceConfig object.
 	 * Because the Comet Server requires strict distinction between empty objects ({}) and arrays ([]),
@@ -186,38 +201,22 @@ class SourceConfig {
 	 * @param array $arr Object data as PHP array
 	 * @return SourceConfig
 	 */
-	public static function createFromArray(array $arr)
+	public static function createFromArray(array $arr): \Comet\SourceConfig
 	{
-		$stdClass = json_decode(json_encode($arr));
+		$stdClass = json_decode(json_encode($arr, JSON_UNESCAPED_SLASHES));
 		if (is_array($stdClass) && count($stdClass) === 0) {
 			$stdClass = new \stdClass();
 		}
 		return self::createFromStdclass($stdClass);
 	}
-	
-	/**
-	 * Coerce a plain PHP array into a new strongly-typed SourceConfig object.
-	 * Because the Comet Server requires strict distinction between empty objects ({}) and arrays ([]),
-	 * the result of this method may not be safe to re-submit to the Comet Server.
-	 *
-	 * @deprecated 3.0.0 Unsafe for round-trip server traversal. You should either 
-	 *             (A) acknowledge this and continue by switching to createFromArray, or
-	 *             (b) switch to the roundtrip-safe createFromStdclass alternative.
-	 * @param array $arr Object data as PHP array
-	 * @return SourceConfig
-	 */
-	public static function createFrom(array $arr)
-	{
-		return self::createFromArray($arr);
-	}
-	
+
 	/**
 	 * Coerce a JSON string into a new strongly-typed SourceConfig object.
 	 *
 	 * @param string $JsonString Object data as JSON string
 	 * @return SourceConfig
 	 */
-	public static function createFromJSON($JsonString)
+	public static function createFromJSON(string $JsonString): \Comet\SourceConfig
 	{
 		$decodedJsonObject = json_decode($JsonString); // as stdClass
 		if (\json_last_error() != \JSON_ERROR_NONE) {
@@ -227,7 +226,7 @@ class SourceConfig {
 		$retn->inflateFrom($decodedJsonObject);
 		return $retn;
 	}
-	
+
 	/**
 	 * Convert this SourceConfig object into a plain PHP array.
 	 *
@@ -236,7 +235,7 @@ class SourceConfig {
 	 * @param bool $for_json_encode Represent empty key-value maps as \stdClass instead of plain PHP arrays
 	 * @return array
 	 */
-	public function toArray($for_json_encode = false)
+	public function toArray(bool $for_json_encode = false): array
 	{
 		$ret = [];
 		$ret["Engine"] = $this->Engine;
@@ -251,6 +250,14 @@ class SourceConfig {
 				$c0[] = $val0;
 			}
 			$ret["PreExec"] = $c0;
+		}
+		{
+			$c0 = [];
+			for($i0 = 0; $i0 < count($this->ThawExec); ++$i0) {
+				$val0 = $this->ThawExec[$i0];
+				$c0[] = $val0;
+			}
+			$ret["ThawExec"] = $c0;
 		}
 		{
 			$c0 = [];
@@ -295,47 +302,47 @@ class SourceConfig {
 		} else {
 			$ret["Statistics"] = $this->Statistics->toArray($for_json_encode);
 		}
-		
+
 		// Reinstate unknown properties from future server versions
 		foreach($this->__unknown_properties as $k => $v) {
 			$ret[$k] = $v;
 		}
-		
+
 		return $ret;
 	}
-	
+
 	/**
 	 * Convert this object to a JSON string.
 	 * The result is suitable to submit to the Comet Server API.
 	 *
 	 * @return string
 	 */
-	public function toJSON()
+	public function toJSON(): string
 	{
 		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
-			return json_encode($arr);
+			return json_encode($arr, JSON_UNESCAPED_SLASHES);
 		}
 	}
-	
+
 	/**
 	 * Convert this object to a PHP \stdClass.
 	 * This may be a more convenient format for working with unknown class properties.
 	 *
 	 * @return \stdClass
 	 */
-	public function toStdClass()
+	public function toStdClass(): \stdClass
 	{
 		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {
-			return json_decode(json_encode($arr));
+			return json_decode(json_encode($arr, JSON_UNESCAPED_SLASHES));
 		}
 	}
-	
+
 	/**
 	 * Erase any preserved object properties that are unknown to this Comet Server SDK.
 	 *
@@ -348,6 +355,6 @@ class SourceConfig {
 			$this->Statistics->RemoveUnknownProperties();
 		}
 	}
-	
+
 }
 

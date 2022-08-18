@@ -9,7 +9,7 @@ class ExampleTest extends \PHPUnit\Framework\TestCase {
 	 */
 	protected $server = null;
 
-	public function setUp() {
+	public function setUp(): void {
 		$this->server = new \Comet\Server(
 			$_SERVER['COMET_SERVER_ADDR'],
 			$_SERVER['COMET_SERVER_USER'],
@@ -94,13 +94,13 @@ class ExampleTest extends \PHPUnit\Framework\TestCase {
 		// same running server instance should be faster
 
 		$data = $this->server->AdminBrandingGenerateClientLinuxgeneric();
-		$this->assertTrue( self::sizeWithinRange(strlen($data), 15, 20), "Got size ".strlen($data)." for linux-generic, expected 15-20 MB" );
+		$this->assertTrue( self::sizeWithinRange(strlen($data), 19, 25), "Got size ".strlen($data)." for linux-generic, expected 19-25 MB" );
 
 		$data = $this->server->AdminBrandingGenerateClientMacosX8664();
 		$this->assertTrue( self::sizeWithinRange(strlen($data), 15, 20), "Got size ".strlen($data)." for macos-x86_64, expected 15-20 MB" );
 
 		$data = $this->server->AdminBrandingGenerateClientWindowsAnycpuZip();
-		$this->assertTrue( self::sizeWithinRange(strlen($data), 40, 50), "Got size ".strlen($data)." for windows-anycpu-zip, expected 40-50 MB" );
+		$this->assertTrue( self::sizeWithinRange(strlen($data), 40, 60), "Got size ".strlen($data)." for windows-anycpu-zip, expected 40-60 MB" );
 
 		$data = $this->server->AdminBrandingGenerateClientWindowsX8632Zip();
 		$this->assertTrue( self::sizeWithinRange(strlen($data), 20, 30), "Got size ".strlen($data)." for windows-x86_32-zip, expected 20-30 MB" );
@@ -154,6 +154,44 @@ class ExampleTest extends \PHPUnit\Framework\TestCase {
 
 		// Check if our trivial modification is still there
 		// TODO
+	}
+
+	public function testOtherLanguage() {
+		$unknown_username = "comet-test-unknown-user-".time();
+
+		$this->server->setLanguage('en_US');
+
+		try {
+			$userpc = $this->server->AdminGetUserProfile($unknown_username);
+			$this->fail("Shouldn't reach this");
+		} catch (\Exception $e) {
+			$this->assertEquals("Error 400: User not found", $e->getMessage());
+		}
+
+		$this->server->setLanguage('es_ES');
+		
+		try {
+			$userpc = $this->server->AdminGetUserProfile($unknown_username);
+			$this->fail("Shouldn't reach this");
+		} catch (\Exception $e) {
+			$this->assertEquals("Error 400: Usuario no encontrado", $e->getMessage());
+		}
+
+		// Revert back
+		$this->server->setLanguage('en_US');
+	}
+
+	public function testMultipartResource() {
+		// The AdminMetaResourceNew API uses a multipart submission body instead of a
+		// regular form body. Test that we can round-trip a binary resource
+
+		$resource_content = "comet-test-resource-content-".time();
+
+		$props = $this->server->AdminMetaResourceNew($resource_content);
+
+		$result = $this->server->AdminMetaResourceGet($props->ResourceHash);
+
+		$this->assertEquals($resource_content, $result);
 	}
 	
 }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2018-2020 Comet Licensing Ltd.
+ * Copyright (c) 2018-2022 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
  * 
  * SPDX-License-Identifier: MIT
@@ -37,11 +37,26 @@ class Server {
 	protected $password = '';
 
 	/**
+	 * The TOTP code for administrative API requests to the Comet Server
+	 *
+	 * @var string
+	 */
+	protected $TOTPCode = '';
+
+	/**
 	 * The GuzzleHttp client used to make synchronous network requests
 	 *
 	 * @var \GuzzleHttp\Client
 	 */
 	protected $client = null;
+
+	/**
+	 * The language string to send to the remote Comet Server, for receiving translated
+	 * status message text
+	 * 
+	 * @var string|null
+	 */
+	protected $language = null;
 
 	/**
 	 * Construct a new \Comet\Server instance.
@@ -78,6 +93,28 @@ class Server {
 		$this->client = $client;
 	}
 
+	/**
+	 * Supply a TOTP code to authenticate 2FA-restricted accounts
+	 *
+	 * @param string $TOTPCode
+	 * @return void
+	 */
+	public function setTOTPCode($TOTPCode) {
+		$this->TOTPCode = $TOTPCode;
+	}
+
+	/**
+	 * Specify our preferred language. The Comet Server may supply translated response messages.
+	 * 
+	 * The value should be one of Comet Server's supported languages, such as 'en_US' or 'pt_BR'.
+	 *
+	 * @param string $language
+	 * @return void
+	 */
+	public function setLanguage($language) {
+		$this->language = $language;
+	}
+
 	/** 
 	 * Retrieve properties about the current admin account
 	 * Some key parameters are obscured, but the obscured values are safely recognised by the corresponding AdminAccountSetProperties API.
@@ -87,7 +124,7 @@ class Server {
 	 * @return \Comet\AdminAccountPropertiesResponse 
 	 * @throws \Exception
 	 */
-	public function AdminAccountProperties()
+	public function AdminAccountProperties(): \Comet\AdminAccountPropertiesResponse
 	{
 		$nr = new \Comet\AdminAccountPropertiesRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -103,7 +140,7 @@ class Server {
 	 * @return \Comet\TotpRegeneratedResponse 
 	 * @throws \Exception
 	 */
-	public function AdminAccountRegenerateTotp()
+	public function AdminAccountRegenerateTotp(): \Comet\TotpRegeneratedResponse
 	{
 		$nr = new \Comet\AdminAccountRegenerateTotpRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -118,7 +155,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminAccountSessionRevoke()
+	public function AdminAccountSessionRevoke(): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminAccountSessionRevokeRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -130,11 +167,11 @@ class Server {
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
 	 *
-	 * @param string $SelfAddress External URL of this server (used for U2F AppID) (optional)
+	 * @param string $SelfAddress External URL of this server (optional)
 	 * @return \Comet\SessionKeyRegeneratedResponse 
 	 * @throws \Exception
 	 */
-	public function AdminAccountSessionStart($SelfAddress = null)
+	public function AdminAccountSessionStart(string $SelfAddress = null): \Comet\SessionKeyRegeneratedResponse
 	{
 		if ($SelfAddress === null) {
 			$SelfAddress = $this->server_url;
@@ -154,7 +191,7 @@ class Server {
 	 * @return \Comet\SessionKeyRegeneratedResponse 
 	 * @throws \Exception
 	 */
-	public function AdminAccountSessionStartAsUser($TargetUser)
+	public function AdminAccountSessionStartAsUser(string $TargetUser): \Comet\SessionKeyRegeneratedResponse
 	{
 		$nr = new \Comet\AdminAccountSessionStartAsUserRequest($TargetUser);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -173,7 +210,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminAccountSetProperties(AdminSecurityOptions $Security)
+	public function AdminAccountSetProperties(\Comet\AdminSecurityOptions $Security): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminAccountSetPropertiesRequest($Security);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -182,6 +219,9 @@ class Server {
 
 	/** 
 	 * Register a new FIDO U2F token
+	 * Browser support for U2F is ending in February 2022. WebAuthn is backwards
+	 * compatible with U2F keys, and Comet will automatically migrate existing U2F keys
+	 * to allow their use with the WebAuthn endpoints.
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
 	 *
@@ -189,7 +229,7 @@ class Server {
 	 * @return \Comet\U2FRegistrationChallengeResponse 
 	 * @throws \Exception
 	 */
-	public function AdminAccountU2fRequestRegistrationChallenge($SelfAddress)
+	public function AdminAccountU2fRequestRegistrationChallenge(string $SelfAddress): \Comet\U2FRegistrationChallengeResponse
 	{
 		$nr = new \Comet\AdminAccountU2fRequestRegistrationChallengeRequest($SelfAddress);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -198,6 +238,9 @@ class Server {
 
 	/** 
 	 * Register a new FIDO U2F token
+	 * Browser support for U2F is ending in February 2022. WebAuthn is backwards
+	 * compatible with U2F keys, and Comet will automatically migrate existing U2F keys
+	 * to allow their use with the WebAuthn endpoints.
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
 	 *
@@ -209,7 +252,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminAccountU2fSubmitChallengeResponse($U2FChallengeID, $U2FClientData, $U2FRegistrationData, $U2FVersion, $Description)
+	public function AdminAccountU2fSubmitChallengeResponse(string $U2FChallengeID, string $U2FClientData, string $U2FRegistrationData, string $U2FVersion, string $Description): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminAccountU2fSubmitChallengeResponseRequest($U2FChallengeID, $U2FClientData, $U2FRegistrationData, $U2FVersion, $Description);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -225,11 +268,45 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminAccountValidateTotp($TOTPCode)
+	public function AdminAccountValidateTotp(string $TOTPCode): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminAccountValidateTotpRequest($TOTPCode);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminAccountValidateTotpRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Register a new FIDO2 WebAuthn token
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 *
+	 * @param string $SelfAddress External URL of this server, used as WebAuthn ID
+	 * @return \Comet\WebAuthnRegistrationChallengeResponse 
+	 * @throws \Exception
+	 */
+	public function AdminAccountWebauthnRequestRegistrationChallenge(string $SelfAddress): \Comet\WebAuthnRegistrationChallengeResponse
+	{
+		$nr = new \Comet\AdminAccountWebauthnRequestRegistrationChallengeRequest($SelfAddress);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminAccountWebauthnRequestRegistrationChallengeRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Register a new FIDO2 WebAuthn token
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 *
+	 * @param string $SelfAddress External URL of this server, used as WebAuthn ID
+	 * @param string $ChallengeID Associated value from AdminAccountWebAuthnRequestRegistrationChallenge API
+	 * @param string $Credential JSON-encoded credential
+	 * @return \Comet\APIResponseMessage 
+	 * @throws \Exception
+	 */
+	public function AdminAccountWebauthnSubmitChallengeResponse(string $SelfAddress, string $ChallengeID, string $Credential): \Comet\APIResponseMessage
+	{
+		$nr = new \Comet\AdminAccountWebauthnSubmitChallengeResponseRequest($SelfAddress, $ChallengeID, $Credential);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminAccountWebauthnSubmitChallengeResponseRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
@@ -242,12 +319,13 @@ class Server {
 	 * @param string $TargetPassword New account password
 	 * @param int $StoreRecoveryCode If set to 1, store and keep a password recovery code for the generated user (>= 18.3.9) (optional)
 	 * @param int $RequirePasswordChange If set to 1, require to reset password at the first login for the generated user (>= 20.3.4) (optional)
+	 * @param string $TargetOrganization If present, create the user account on behalf of another organization. Only allowed for administrator accounts in the top-level organization. (>= 22.3.7) (optional)
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminAddUser($TargetUser, $TargetPassword, $StoreRecoveryCode = null, $RequirePasswordChange = null)
+	public function AdminAddUser(string $TargetUser, string $TargetPassword, int $StoreRecoveryCode = null, int $RequirePasswordChange = null, string $TargetOrganization = null): \Comet\APIResponseMessage
 	{
-		$nr = new \Comet\AdminAddUserRequest($TargetUser, $TargetPassword, $StoreRecoveryCode, $RequirePasswordChange);
+		$nr = new \Comet\AdminAddUserRequest($TargetUser, $TargetPassword, $StoreRecoveryCode, $RequirePasswordChange, $TargetOrganization);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminAddUserRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
@@ -261,14 +339,70 @@ class Server {
 	 *
 	 * @param string $TargetUser New account username
 	 * @param \Comet\UserProfileConfig $ProfileData New account profile
+	 * @param string $TargetOrganization If present, create the user account on behalf of another organization. Only allowed for administrator accounts in the top-level organization. (>= 22.3.7) (optional)
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminAddUserFromProfile($TargetUser, UserProfileConfig $ProfileData)
+	public function AdminAddUserFromProfile(string $TargetUser, \Comet\UserProfileConfig $ProfileData, string $TargetOrganization = null): \Comet\APIResponseMessage
 	{
-		$nr = new \Comet\AdminAddUserFromProfileRequest($TargetUser, $ProfileData);
+		$nr = new \Comet\AdminAddUserFromProfileRequest($TargetUser, $ProfileData, $TargetOrganization);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminAddUserFromProfileRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Delete an administrator
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * Access to this API may be prevented on a per-administrator basis.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
+	 *
+	 * @param string $TargetUser the username of the admin to be deleted
+	 * @return \Comet\APIResponseMessage 
+	 * @throws \Exception
+	 */
+	public function AdminAdminUserDelete(string $TargetUser): \Comet\APIResponseMessage
+	{
+		$nr = new \Comet\AdminAdminUserDeleteRequest($TargetUser);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminAdminUserDeleteRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * List administrators
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * Access to this API may be prevented on a per-administrator basis.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
+	 *
+	 * @return \Comet\AllowedAdminUser[] 
+	 * @throws \Exception
+	 */
+	public function AdminAdminUserList(): array
+	{
+		$nr = new \Comet\AdminAdminUserListRequest();
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminAdminUserListRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Add a new administrator
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * Access to this API may be prevented on a per-administrator basis.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
+	 *
+	 * @param string $TargetUser the username for this new admin
+	 * @param string $TargetPassword the password for this new admin user
+	 * @param string $TargetOrgID provide the organization ID for this user, it will default to the org of the authenticating user otherwise (optional)
+	 * @return \Comet\APIResponseMessage 
+	 * @throws \Exception
+	 */
+	public function AdminAdminUserNew(string $TargetUser, string $TargetPassword, string $TargetOrgID = null): \Comet\APIResponseMessage
+	{
+		$nr = new \Comet\AdminAdminUserNewRequest($TargetUser, $TargetPassword, $TargetOrgID);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminAdminUserNewRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
@@ -281,7 +415,7 @@ class Server {
 	 * @return \Comet\AvailableDownload[] An array with int keys. 
 	 * @throws \Exception
 	 */
-	public function AdminBrandingAvailablePlatforms()
+	public function AdminBrandingAvailablePlatforms(): array
 	{
 		$nr = new \Comet\AdminBrandingAvailablePlatformsRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -300,7 +434,7 @@ class Server {
 	 * @return string 
 	 * @throws \Exception
 	 */
-	public function AdminBrandingGenerateClientByPlatform($Platform, $SelfAddress = null)
+	public function AdminBrandingGenerateClientByPlatform(int $Platform, string $SelfAddress = null): string
 	{
 		if ($SelfAddress === null) {
 			$SelfAddress = $this->server_url;
@@ -322,7 +456,7 @@ class Server {
 	 * @return string 
 	 * @throws \Exception
 	 */
-	public function AdminBrandingGenerateClientLinuxgeneric($SelfAddress = null)
+	public function AdminBrandingGenerateClientLinuxgeneric(string $SelfAddress = null): string
 	{
 		if ($SelfAddress === null) {
 			$SelfAddress = $this->server_url;
@@ -344,7 +478,7 @@ class Server {
 	 * @return string 
 	 * @throws \Exception
 	 */
-	public function AdminBrandingGenerateClientMacosX8664($SelfAddress = null)
+	public function AdminBrandingGenerateClientMacosX8664(string $SelfAddress = null): string
 	{
 		if ($SelfAddress === null) {
 			$SelfAddress = $this->server_url;
@@ -353,6 +487,50 @@ class Server {
 		$nr = new \Comet\AdminBrandingGenerateClientMacosX8664Request($SelfAddress);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminBrandingGenerateClientMacosX8664Request::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Download software (Synology SPK for DSM 6)
+	 * 
+	 * This API requires administrator authentication credentials, unless the server is configured to allow unauthenticated software downloads.
+	 * This API requires the Software Build Role to be enabled.
+	 * This API requires the Auth Role to be enabled.
+	 *
+	 * @param string $SelfAddress The external URL of this server, used to resolve conflicts (optional)
+	 * @return string 
+	 * @throws \Exception
+	 */
+	public function AdminBrandingGenerateClientSpkDsm6(string $SelfAddress = null): string
+	{
+		if ($SelfAddress === null) {
+			$SelfAddress = $this->server_url;
+		}
+
+		$nr = new \Comet\AdminBrandingGenerateClientSpkDsm6Request($SelfAddress);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminBrandingGenerateClientSpkDsm6Request::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Download software (Synology SPK for DSM 7)
+	 * 
+	 * This API requires administrator authentication credentials, unless the server is configured to allow unauthenticated software downloads.
+	 * This API requires the Software Build Role to be enabled.
+	 * This API requires the Auth Role to be enabled.
+	 *
+	 * @param string $SelfAddress The external URL of this server, used to resolve conflicts (optional)
+	 * @return string 
+	 * @throws \Exception
+	 */
+	public function AdminBrandingGenerateClientSpkDsm7(string $SelfAddress = null): string
+	{
+		if ($SelfAddress === null) {
+			$SelfAddress = $this->server_url;
+		}
+
+		$nr = new \Comet\AdminBrandingGenerateClientSpkDsm7Request($SelfAddress);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminBrandingGenerateClientSpkDsm7Request::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
@@ -367,7 +545,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminBrandingGenerateClientTest($Platform, $SelfAddress = null)
+	public function AdminBrandingGenerateClientTest(int $Platform, string $SelfAddress = null): \Comet\APIResponseMessage
 	{
 		if ($SelfAddress === null) {
 			$SelfAddress = $this->server_url;
@@ -390,7 +568,7 @@ class Server {
 	 * @return string 
 	 * @throws \Exception
 	 */
-	public function AdminBrandingGenerateClientWindowsAnycpuExe($SelfAddress = null)
+	public function AdminBrandingGenerateClientWindowsAnycpuExe(string $SelfAddress = null): string
 	{
 		if ($SelfAddress === null) {
 			$SelfAddress = $this->server_url;
@@ -413,7 +591,7 @@ class Server {
 	 * @return string 
 	 * @throws \Exception
 	 */
-	public function AdminBrandingGenerateClientWindowsAnycpuZip($SelfAddress = null)
+	public function AdminBrandingGenerateClientWindowsAnycpuZip(string $SelfAddress = null): string
 	{
 		if ($SelfAddress === null) {
 			$SelfAddress = $this->server_url;
@@ -436,7 +614,7 @@ class Server {
 	 * @return string 
 	 * @throws \Exception
 	 */
-	public function AdminBrandingGenerateClientWindowsX8632Exe($SelfAddress = null)
+	public function AdminBrandingGenerateClientWindowsX8632Exe(string $SelfAddress = null): string
 	{
 		if ($SelfAddress === null) {
 			$SelfAddress = $this->server_url;
@@ -459,7 +637,7 @@ class Server {
 	 * @return string 
 	 * @throws \Exception
 	 */
-	public function AdminBrandingGenerateClientWindowsX8632Zip($SelfAddress = null)
+	public function AdminBrandingGenerateClientWindowsX8632Zip(string $SelfAddress = null): string
 	{
 		if ($SelfAddress === null) {
 			$SelfAddress = $this->server_url;
@@ -482,7 +660,7 @@ class Server {
 	 * @return string 
 	 * @throws \Exception
 	 */
-	public function AdminBrandingGenerateClientWindowsX8664Exe($SelfAddress = null)
+	public function AdminBrandingGenerateClientWindowsX8664Exe(string $SelfAddress = null): string
 	{
 		if ($SelfAddress === null) {
 			$SelfAddress = $this->server_url;
@@ -505,7 +683,7 @@ class Server {
 	 * @return string 
 	 * @throws \Exception
 	 */
-	public function AdminBrandingGenerateClientWindowsX8664Zip($SelfAddress = null)
+	public function AdminBrandingGenerateClientWindowsX8664Zip(string $SelfAddress = null): string
 	{
 		if ($SelfAddress === null) {
 			$SelfAddress = $this->server_url;
@@ -527,7 +705,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminBulletinSubmit($Subject, $Content)
+	public function AdminBulletinSubmit(string $Subject, string $Content): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminBulletinSubmitRequest($Subject, $Content);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -538,12 +716,13 @@ class Server {
 	 * Get Constellation bucket usage report (cached)
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 * This API requires the Constellation Role to be enabled.
 	 *
 	 * @return \Comet\ConstellationCheckReport 
 	 * @throws \Exception
 	 */
-	public function AdminConstellationLastReport()
+	public function AdminConstellationLastReport(): \Comet\ConstellationCheckReport
 	{
 		$nr = new \Comet\AdminConstellationLastReportRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -554,12 +733,13 @@ class Server {
 	 * Get Constellation bucket usage report (regenerate)
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 * This API requires the Constellation Role to be enabled.
 	 *
 	 * @return \Comet\ConstellationCheckReport 
 	 * @throws \Exception
 	 */
-	public function AdminConstellationNewReport()
+	public function AdminConstellationNewReport(): \Comet\ConstellationCheckReport
 	{
 		$nr = new \Comet\AdminConstellationNewReportRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -570,12 +750,13 @@ class Server {
 	 * Prune unused buckets
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 * This API requires the Constellation Role to be enabled.
 	 *
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminConstellationPruneNow()
+	public function AdminConstellationPruneNow(): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminConstellationPruneNowRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -586,12 +767,13 @@ class Server {
 	 * Get Constellation status
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 * This API requires the Constellation Role to be enabled.
 	 *
 	 * @return \Comet\ConstellationStatusAPIResponse 
 	 * @throws \Exception
 	 */
-	public function AdminConstellationStatus()
+	public function AdminConstellationStatus(): \Comet\ConstellationStatusAPIResponse
 	{
 		$nr = new \Comet\AdminConstellationStatusRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -599,10 +781,33 @@ class Server {
 	}
 
 	/** 
+	 * Create token for silent installation
+	 * Currently only supported for Windows & macOS only
+	 * Provide the installation token to silently install the client on windows `install.exe /TOKEN=<installtoken>`
+	 * Provide the installation token to silently install the client on Mac OS `sudo launchctl setenv BACKUP_APP_TOKEN "installtoken" && sudo /usr/sbin/installer -allowUntrusted -pkg "Comet Backup.pkg" -target /`
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API requires the Auth Role to be enabled.
+	 *
+	 * @param string $TargetUser Selected account username
+	 * @param string $TargetPassword Selected account password
+	 * @param string $Server External URL of the authentication server that is different from the current server (optional)
+	 * @return \Comet\InstallTokenResponse 
+	 * @throws \Exception
+	 */
+	public function AdminCreateInstallToken(string $TargetUser, string $TargetPassword, string $Server = null): \Comet\InstallTokenResponse
+	{
+		$nr = new \Comet\AdminCreateInstallTokenRequest($TargetUser, $TargetPassword, $Server);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminCreateInstallTokenRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
 	 * Delete user account
 	 * This does not remove any storage buckets. Unused storage buckets will be cleaned up by the Constellation Role.
 	 * Any stored data can not be decrypted without the user profile. Misuse can cause data loss!
 	 * This also allows to uninstall software from active devices under the user account
+	 * This also removes all job history for the user account.
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
 	 * This API requires the Auth Role to be enabled.
@@ -612,7 +817,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDeleteUser($TargetUser, UninstallConfig $UninstallConfig = null)
+	public function AdminDeleteUser(string $TargetUser, \Comet\UninstallConfig $UninstallConfig = null): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDeleteUserRequest($TargetUser, $UninstallConfig);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -629,7 +834,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDisableUserTotp($TargetUser)
+	public function AdminDisableUserTotp(string $TargetUser): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDisableUserTotpRequest($TargetUser);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -648,7 +853,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherApplyRetentionRules($TargetID, $Destination)
+	public function AdminDispatcherApplyRetentionRules(string $TargetID, string $Destination): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDispatcherApplyRetentionRulesRequest($TargetID, $Destination);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -667,7 +872,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherDeepverifyStorageVault($TargetID, $Destination)
+	public function AdminDispatcherDeepverifyStorageVault(string $TargetID, string $Destination): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDispatcherDeepverifyStorageVaultRequest($TargetID, $Destination);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -686,11 +891,31 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherDeleteSnapshot($TargetID, $DestinationID, $SnapshotID)
+	public function AdminDispatcherDeleteSnapshot(string $TargetID, string $DestinationID, string $SnapshotID): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDispatcherDeleteSnapshotRequest($TargetID, $DestinationID, $SnapshotID);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminDispatcherDeleteSnapshotRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Instruct a live connected device to delete multiple stored snapshots
+	 * The target device must be running Comet 20.9.10 or later.
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API requires the Auth Role to be enabled.
+	 *
+	 * @param string $TargetID The live connection GUID
+	 * @param string $DestinationID The Storage Vault GUID
+	 * @param string[] $SnapshotIDs The backup job snapshot IDs to delete
+	 * @return \Comet\APIResponseMessage 
+	 * @throws \Exception
+	 */
+	public function AdminDispatcherDeleteSnapshots(string $TargetID, string $DestinationID, array $SnapshotIDs): \Comet\APIResponseMessage
+	{
+		$nr = new \Comet\AdminDispatcherDeleteSnapshotsRequest($TargetID, $DestinationID, $SnapshotIDs);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminDispatcherDeleteSnapshotsRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
@@ -704,11 +929,32 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherDropConnection($TargetID)
+	public function AdminDispatcherDropConnection(string $TargetID): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDispatcherDropConnectionRequest($TargetID);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminDispatcherDropConnectionRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Request HTML content of an email
+	 * The remote device must have given consent for an MSP to browse their mail
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API requires the Auth Role to be enabled.
+	 *
+	 * @param string $TargetID The live connection GUID
+	 * @param string $Snapshot where the email belongs to
+	 * @param string $Destination The Storage Vault ID
+	 * @param string $Path of the email to view
+	 * @return \Comet\EmailReportGeneratedPreview 
+	 * @throws \Exception
+	 */
+	public function AdminDispatcherEmailPreview(string $TargetID, string $Snapshot, string $Destination, string $Path): \Comet\EmailReportGeneratedPreview
+	{
+		$nr = new \Comet\AdminDispatcherEmailPreviewRequest($TargetID, $Snapshot, $Destination, $Path);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminDispatcherEmailPreviewRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
@@ -723,7 +969,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherImportApply($TargetID, $ImportSourceID)
+	public function AdminDispatcherImportApply(string $TargetID, string $ImportSourceID): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDispatcherImportApplyRequest($TargetID, $ImportSourceID);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -741,7 +987,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherKillProcess($TargetID)
+	public function AdminDispatcherKillProcess(string $TargetID): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDispatcherKillProcessRequest($TargetID);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -754,14 +1000,52 @@ class Server {
 	 * You must supply administrator authentication credentials to use this API.
 	 * This API requires the Auth Role to be enabled.
 	 *
+	 * @param string $UserNameFilter User name filter string (optional)
 	 * @return \Comet\LiveUserConnection[] An array with string keys. 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherListActive()
+	public function AdminDispatcherListActive(string $UserNameFilter = null): array
 	{
-		$nr = new \Comet\AdminDispatcherListActiveRequest();
+		$nr = new \Comet\AdminDispatcherListActiveRequest($UserNameFilter);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminDispatcherListActiveRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Request a list of Office365 Resources (groups, sites, teams groups and users)
+	 * The remote device must have given consent for an MSP to browse their files.
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API requires the Auth Role to be enabled.
+	 *
+	 * @param string $TargetID The live connection GUID
+	 * @param \Comet\Office365Credential $Credentials The Office365 account credential
+	 * @return \Comet\BrowseOffice365ListVirtualAccountsResponse 
+	 * @throws \Exception
+	 */
+	public function AdminDispatcherOffice365ListVirtualAccounts(string $TargetID, \Comet\Office365Credential $Credentials): \Comet\BrowseOffice365ListVirtualAccountsResponse
+	{
+		$nr = new \Comet\AdminDispatcherOffice365ListVirtualAccountsRequest($TargetID, $Credentials);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminDispatcherOffice365ListVirtualAccountsRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Test the connection to the storage bucket
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API requires the Auth Role to be enabled.
+	 *
+	 * @param string $TargetID The live connection GUID
+	 * @param \Comet\DestinationLocation $ExtraData The destination location settings
+	 * @return \Comet\APIResponseMessage 
+	 * @throws \Exception
+	 */
+	public function AdminDispatcherPingDestination(string $TargetID, \Comet\DestinationLocation $ExtraData): \Comet\APIResponseMessage
+	{
+		$nr = new \Comet\AdminDispatcherPingDestinationRequest($TargetID, $ExtraData);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminDispatcherPingDestinationRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
@@ -775,11 +1059,49 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherRefetchProfile($TargetID)
+	public function AdminDispatcherRefetchProfile(string $TargetID): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDispatcherRefetchProfileRequest($TargetID);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminDispatcherRefetchProfileRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Begin the process of registering a new Azure AD application that can access Office 365 for backup
+	 * After calling this API, you should supply the login details to the end-user, and then begin polling the AdminDispatcherRegisterOfficeApplicationCheck with the supplied "Continuation" parameter to check on the registration process.
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API requires the Auth Role to be enabled.
+	 *
+	 * @param string $TargetID The live connection GUID
+	 * @param string $EmailAddress The email address of the Azure AD administrator
+	 * @return \Comet\RegisterOfficeApplicationBeginResponse 
+	 * @throws \Exception
+	 */
+	public function AdminDispatcherRegisterOfficeApplicationBegin(string $TargetID, string $EmailAddress): \Comet\RegisterOfficeApplicationBeginResponse
+	{
+		$nr = new \Comet\AdminDispatcherRegisterOfficeApplicationBeginRequest($TargetID, $EmailAddress);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminDispatcherRegisterOfficeApplicationBeginRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Check the process of registering a new Azure AD application that can access Office 365 for backup
+	 * You should begin the process by calling AdminDispatcherRegisterOfficeApplicationBegin and asking the end-user to complete the Azure authentication steps.
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API requires the Auth Role to be enabled.
+	 *
+	 * @param string $TargetID The live connection GUID
+	 * @param string $Continuation The ID returned from the AdminDispatcherRegisterOfficeApplicationBegin endpoint
+	 * @return \Comet\RegisterOfficeApplicationCheckResponse 
+	 * @throws \Exception
+	 */
+	public function AdminDispatcherRegisterOfficeApplicationCheck(string $TargetID, string $Continuation): \Comet\RegisterOfficeApplicationCheckResponse
+	{
+		$nr = new \Comet\AdminDispatcherRegisterOfficeApplicationCheckRequest($TargetID, $Continuation);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminDispatcherRegisterOfficeApplicationCheckRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
@@ -794,7 +1116,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherReindexStorageVault($TargetID, $Destination)
+	public function AdminDispatcherReindexStorageVault(string $TargetID, string $Destination): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDispatcherReindexStorageVaultRequest($TargetID, $Destination);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -811,7 +1133,7 @@ class Server {
 	 * @return \Comet\BrowseDiskDrivesResponse 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherRequestBrowseDiskDrives($TargetID)
+	public function AdminDispatcherRequestBrowseDiskDrives(string $TargetID): \Comet\BrowseDiskDrivesResponse
 	{
 		$nr = new \Comet\AdminDispatcherRequestBrowseDiskDrivesRequest($TargetID);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -828,7 +1150,7 @@ class Server {
 	 * @return \Comet\BrowseEDBResponse 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherRequestBrowseExchangeEdb($TargetID)
+	public function AdminDispatcherRequestBrowseExchangeEdb(string $TargetID): \Comet\BrowseEDBResponse
 	{
 		$nr = new \Comet\AdminDispatcherRequestBrowseExchangeEdbRequest($TargetID);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -845,11 +1167,68 @@ class Server {
 	 * @return \Comet\BrowseHVResponse 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherRequestBrowseHyperv($TargetID)
+	public function AdminDispatcherRequestBrowseHyperv(string $TargetID): \Comet\BrowseHVResponse
 	{
 		$nr = new \Comet\AdminDispatcherRequestBrowseHypervRequest($TargetID);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminDispatcherRequestBrowseHypervRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Request a list of tables in MongoDB database
+	 * The remote device must have given consent for an MSP to browse their files.
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API requires the Auth Role to be enabled.
+	 *
+	 * @param string $TargetID The live connection GUID
+	 * @param \Comet\MongoDBConnection $Credentials The Mongo database authentication settings
+	 * @return \Comet\BrowseSQLServerResponse 
+	 * @throws \Exception
+	 */
+	public function AdminDispatcherRequestBrowseMongodb(string $TargetID, \Comet\MongoDBConnection $Credentials): \Comet\BrowseSQLServerResponse
+	{
+		$nr = new \Comet\AdminDispatcherRequestBrowseMongodbRequest($TargetID, $Credentials);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminDispatcherRequestBrowseMongodbRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Request a list of tables in MSSQL database
+	 * The remote device must have given consent for an MSP to browse their files.
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API requires the Auth Role to be enabled.
+	 *
+	 * @param string $TargetID The live connection GUID
+	 * @param \Comet\MSSQLConnection $Credentials The MSSQL database authentication settings
+	 * @return \Comet\BrowseSQLServerResponse 
+	 * @throws \Exception
+	 */
+	public function AdminDispatcherRequestBrowseMssql(string $TargetID, \Comet\MSSQLConnection $Credentials): \Comet\BrowseSQLServerResponse
+	{
+		$nr = new \Comet\AdminDispatcherRequestBrowseMssqlRequest($TargetID, $Credentials);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminDispatcherRequestBrowseMssqlRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Request a list of tables in MySQL database
+	 * The remote device must have given consent for an MSP to browse their files.
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API requires the Auth Role to be enabled.
+	 *
+	 * @param string $TargetID The live connection GUID
+	 * @param \Comet\MySQLConnection $Credentials The MySQL database authentication settings
+	 * @return \Comet\BrowseSQLServerResponse 
+	 * @throws \Exception
+	 */
+	public function AdminDispatcherRequestBrowseMysql(string $TargetID, \Comet\MySQLConnection $Credentials): \Comet\BrowseSQLServerResponse
+	{
+		$nr = new \Comet\AdminDispatcherRequestBrowseMysqlRequest($TargetID, $Credentials);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminDispatcherRequestBrowseMysqlRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
@@ -862,7 +1241,7 @@ class Server {
 	 * @return \Comet\BrowseVSSResponse 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherRequestBrowseVssAaw($TargetID)
+	public function AdminDispatcherRequestBrowseVssAaw(string $TargetID): \Comet\BrowseVSSResponse
 	{
 		$nr = new \Comet\AdminDispatcherRequestBrowseVssAawRequest($TargetID);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -878,10 +1257,10 @@ class Server {
 	 *
 	 * @param string $TargetID The live connection GUID
 	 * @param string $Path Browse objects inside this path. If empty or not present, returns the top-level device paths (optional)
-	 * @return \Comet\StoredObject[] 
+	 * @return \Comet\DispatcherStoredObjectsResponse 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherRequestFilesystemObjects($TargetID, $Path = null)
+	public function AdminDispatcherRequestFilesystemObjects(string $TargetID, string $Path = null): \Comet\DispatcherStoredObjectsResponse
 	{
 		$nr = new \Comet\AdminDispatcherRequestFilesystemObjectsRequest($TargetID, $Path);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -898,7 +1277,7 @@ class Server {
 	 * @return \Comet\DispatcherAdminSourcesResponse 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherRequestImportSources($TargetID)
+	public function AdminDispatcherRequestImportSources(string $TargetID): \Comet\DispatcherAdminSourcesResponse
 	{
 		$nr = new \Comet\AdminDispatcherRequestImportSourcesRequest($TargetID);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -906,8 +1285,47 @@ class Server {
 	}
 
 	/** 
+	 * Request a list of Office365 mailbox accounts
+	 * The remote device must have given consent for an MSP to browse their files.
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API requires the Auth Role to be enabled.
+	 *
+	 * @param string $TargetID The live connection GUID
+	 * @param \Comet\Office365Credential $Credentials The Office365 account credential
+	 * @return \Comet\BrowseOffice365ObjectsResponse 
+	 * @throws \Exception
+	 */
+	public function AdminDispatcherRequestOffice365Accounts(string $TargetID, \Comet\Office365Credential $Credentials): \Comet\BrowseOffice365ObjectsResponse
+	{
+		$nr = new \Comet\AdminDispatcherRequestOffice365AccountsRequest($TargetID, $Credentials);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminDispatcherRequestOffice365AccountsRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Request a list of Office365 sites
+	 * The remote device must have given consent for an MSP to browse their files.
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API requires the Auth Role to be enabled.
+	 *
+	 * @param string $TargetID The live connection GUID
+	 * @param \Comet\Office365Credential $Credentials The Office365 account credential
+	 * @return \Comet\BrowseOffice365ObjectsResponse 
+	 * @throws \Exception
+	 */
+	public function AdminDispatcherRequestOffice365Sites(string $TargetID, \Comet\Office365Credential $Credentials): \Comet\BrowseOffice365ObjectsResponse
+	{
+		$nr = new \Comet\AdminDispatcherRequestOffice365SitesRequest($TargetID, $Credentials);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminDispatcherRequestOffice365SitesRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
 	 * Request a list of stored objects inside an existing backup job
 	 * The remote device must have given consent for an MSP to browse their files.
+	 * To service this request, the remote device must connect to the Storage Vault and load index data. There may be a small delay. If the remote device is running Comet 20.12.0 or later, the necessary index data is cached when this API is first called, for 15 minutes after the last repeated call. This can improve performance for interactively browsing an entire tree of stored objects.
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
 	 * This API requires the Auth Role to be enabled.
@@ -915,13 +1333,14 @@ class Server {
 	 * @param string $TargetID The live connection GUID
 	 * @param string $Destination The Storage Vault ID
 	 * @param string $SnapshotID The selected backup job snapshot
-	 * @param string $TreeID Browse objects inside subdirectory of backup snapshot (optional)
+	 * @param string $TreeID Browse objects inside subdirectory of backup snapshot. If it is for VMDK single file restore, it should be the disk image's subtree ID. (optional)
+	 * @param \Comet\VMDKSnapshotViewOptions $Options Request a list of stored objects in vmdk file (optional)
 	 * @return \Comet\DispatcherStoredObjectsResponse 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherRequestStoredObjects($TargetID, $Destination, $SnapshotID, $TreeID = null)
+	public function AdminDispatcherRequestStoredObjects(string $TargetID, string $Destination, string $SnapshotID, string $TreeID = null, \Comet\VMDKSnapshotViewOptions $Options = null): \Comet\DispatcherStoredObjectsResponse
 	{
-		$nr = new \Comet\AdminDispatcherRequestStoredObjectsRequest($TargetID, $Destination, $SnapshotID, $TreeID);
+		$nr = new \Comet\AdminDispatcherRequestStoredObjectsRequest($TargetID, $Destination, $SnapshotID, $TreeID, $Options);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminDispatcherRequestStoredObjectsRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
@@ -937,11 +1356,30 @@ class Server {
 	 * @return \Comet\DispatcherVaultSnapshotsResponse 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherRequestVaultSnapshots($TargetID, $Destination)
+	public function AdminDispatcherRequestVaultSnapshots(string $TargetID, string $Destination): \Comet\DispatcherVaultSnapshotsResponse
 	{
 		$nr = new \Comet\AdminDispatcherRequestVaultSnapshotsRequest($TargetID, $Destination);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminDispatcherRequestVaultSnapshotsRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Request a Disk Image snapshot with the windiskbrowse-style from a live connected device
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API requires the Auth Role to be enabled.
+	 *
+	 * @param string $TargetID The live connection GUID
+	 * @param string $Destination The Storage Vault ID
+	 * @param string $SnapshotID The Snapshot ID
+	 * @return \Comet\DispatcherWindiskSnapshotResponse 
+	 * @throws \Exception
+	 */
+	public function AdminDispatcherRequestWindiskSnapshot(string $TargetID, string $Destination, string $SnapshotID): \Comet\DispatcherWindiskSnapshotResponse
+	{
+		$nr = new \Comet\AdminDispatcherRequestWindiskSnapshotRequest($TargetID, $Destination, $SnapshotID);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminDispatcherRequestWindiskSnapshotRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
@@ -955,7 +1393,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherRunBackup($TargetID, $BackupRule)
+	public function AdminDispatcherRunBackup(string $TargetID, string $BackupRule): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDispatcherRunBackupRequest($TargetID, $BackupRule);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -975,7 +1413,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherRunBackupCustom($TargetID, $Source, $Destination, BackupJobAdvancedOptions $Options = null)
+	public function AdminDispatcherRunBackupCustom(string $TargetID, string $Source, string $Destination, \Comet\BackupJobAdvancedOptions $Options = null): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDispatcherRunBackupCustomRequest($TargetID, $Source, $Destination, $Options);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -998,7 +1436,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherRunRestore($TargetID, $Path, $Source, $Destination, $Snapshot = null, array $Paths = null)
+	public function AdminDispatcherRunRestore(string $TargetID, string $Path, string $Source, string $Destination, string $Snapshot = null, array $Paths = null): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDispatcherRunRestoreRequest($TargetID, $Path, $Source, $Destination, $Snapshot, $Paths);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1021,7 +1459,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherRunRestoreCustom($TargetID, $Source, $Destination, RestoreJobAdvancedOptions $Options, $Snapshot = null, array $Paths = null)
+	public function AdminDispatcherRunRestoreCustom(string $TargetID, string $Source, string $Destination, \Comet\RestoreJobAdvancedOptions $Options, string $Snapshot = null, array $Paths = null): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDispatcherRunRestoreCustomRequest($TargetID, $Source, $Destination, $Options, $Snapshot, $Paths);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1039,7 +1477,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherUninstallSoftware($TargetID, $RemoveConfigFile)
+	public function AdminDispatcherUninstallSoftware(string $TargetID, bool $RemoveConfigFile): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDispatcherUninstallSoftwareRequest($TargetID, $RemoveConfigFile);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1059,7 +1497,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherUnlock($TargetID, $Destination)
+	public function AdminDispatcherUnlock(string $TargetID, string $Destination): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDispatcherUnlockRequest($TargetID, $Destination);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1078,7 +1516,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherUpdateLoginUrl($TargetID, $NewURL)
+	public function AdminDispatcherUpdateLoginUrl(string $TargetID, string $NewURL): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminDispatcherUpdateLoginUrlRequest($TargetID, $NewURL);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1097,7 +1535,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminDispatcherUpdateSoftware($TargetID, $SelfAddress = null)
+	public function AdminDispatcherUpdateSoftware(string $TargetID, string $SelfAddress = null): \Comet\APIResponseMessage
 	{
 		if ($SelfAddress === null) {
 			$SelfAddress = $this->server_url;
@@ -1118,7 +1556,7 @@ class Server {
 	 * @return string 
 	 * @throws \Exception
 	 */
-	public function AdminGetJobLog($JobID)
+	public function AdminGetJobLog(string $JobID): string
 	{
 		$nr = new \Comet\AdminGetJobLogRequest($JobID);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1135,7 +1573,7 @@ class Server {
 	 * @return \Comet\JobEntry[] 
 	 * @throws \Exception
 	 */
-	public function AdminGetJobLogEntries($JobID)
+	public function AdminGetJobLogEntries(string $JobID): array
 	{
 		$nr = new \Comet\AdminGetJobLogEntriesRequest($JobID);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1152,7 +1590,7 @@ class Server {
 	 * @return \Comet\BackupJobDetail 
 	 * @throws \Exception
 	 */
-	public function AdminGetJobProperties($JobID)
+	public function AdminGetJobProperties(string $JobID): \Comet\BackupJobDetail
 	{
 		$nr = new \Comet\AdminGetJobPropertiesRequest($JobID);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1169,7 +1607,7 @@ class Server {
 	 * @return \Comet\BackupJobDetail[] 
 	 * @throws \Exception
 	 */
-	public function AdminGetJobsAll()
+	public function AdminGetJobsAll(): array
 	{
 		$nr = new \Comet\AdminGetJobsAllRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1187,7 +1625,7 @@ class Server {
 	 * @return \Comet\BackupJobDetail[] 
 	 * @throws \Exception
 	 */
-	public function AdminGetJobsForCustomSearch(SearchClause $Query)
+	public function AdminGetJobsForCustomSearch(\Comet\SearchClause $Query): array
 	{
 		$nr = new \Comet\AdminGetJobsForCustomSearchRequest($Query);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1202,7 +1640,9 @@ class Server {
 	 * 
 	 * This API will return all jobs that either started or ended within the supplied range.
 	 * 
-	 * Incomplete jobs have an end time of `0`. You can use this API to find incomplete jobs by setting both `Start` and `End` to `0`.
+	 * Incomplete jobs have an end time of `0`. You can use this API to find only incomplete jobs by setting both `Start` and `End` to `0`.
+	 * 
+	 * Prior to Comet Server 22.6.0, additional Incomplete jobs may have been returned if you specified non-zero arguments for both `Start` and `End`.
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
 	 * This API requires the Auth Role to be enabled.
@@ -1212,7 +1652,7 @@ class Server {
 	 * @return \Comet\BackupJobDetail[] 
 	 * @throws \Exception
 	 */
-	public function AdminGetJobsForDateRange($Start, $End)
+	public function AdminGetJobsForDateRange(int $Start, int $End): array
 	{
 		$nr = new \Comet\AdminGetJobsForDateRangeRequest($Start, $End);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1230,7 +1670,7 @@ class Server {
 	 * @return \Comet\BackupJobDetail[] 
 	 * @throws \Exception
 	 */
-	public function AdminGetJobsForUser($TargetUser)
+	public function AdminGetJobsForUser(string $TargetUser): array
 	{
 		$nr = new \Comet\AdminGetJobsForUserRequest($TargetUser);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1247,7 +1687,7 @@ class Server {
 	 * @return \Comet\BackupJobDetail[] 
 	 * @throws \Exception
 	 */
-	public function AdminGetJobsRecent()
+	public function AdminGetJobsRecent(): array
 	{
 		$nr = new \Comet\AdminGetJobsRecentRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1264,7 +1704,7 @@ class Server {
 	 * @return \Comet\UserProfileConfig 
 	 * @throws \Exception
 	 */
-	public function AdminGetUserProfile($TargetUser)
+	public function AdminGetUserProfile(string $TargetUser): \Comet\UserProfileConfig
 	{
 		$nr = new \Comet\AdminGetUserProfileRequest($TargetUser);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1283,7 +1723,7 @@ class Server {
 	 * @return \Comet\GetProfileAndHashResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminGetUserProfileAndHash($TargetUser)
+	public function AdminGetUserProfileAndHash(string $TargetUser): \Comet\GetProfileAndHashResponseMessage
 	{
 		$nr = new \Comet\AdminGetUserProfileAndHashRequest($TargetUser);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1302,7 +1742,7 @@ class Server {
 	 * @return \Comet\GetProfileHashResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminGetUserProfileHash($TargetUser)
+	public function AdminGetUserProfileHash(string $TargetUser): \Comet\GetProfileHashResponseMessage
 	{
 		$nr = new \Comet\AdminGetUserProfileHashRequest($TargetUser);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1313,6 +1753,7 @@ class Server {
 	 * Cancel a running job
 	 * A request is sent to the live-connected device, asking it to cancel the operation. This may fail if there is no live-connection.
 	 * Only jobs from Comet 18.3.5 or newer can be cancelled. A job can only be cancelled if it has a non-empty CancellationID field in its properties.
+	 * If the device is running Comet 21.9.5 or later, this API will wait up to ten seconds for a confirmation from the client.
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
 	 * This API requires the Auth Role to be enabled.
@@ -1322,7 +1763,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminJobCancel($TargetUser, $JobID)
+	public function AdminJobCancel(string $TargetUser, string $JobID): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminJobCancelRequest($TargetUser, $JobID);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1338,7 +1779,7 @@ class Server {
 	 * @return string[] 
 	 * @throws \Exception
 	 */
-	public function AdminListUsers()
+	public function AdminListUsers(): array
 	{
 		$nr = new \Comet\AdminListUsersRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1354,7 +1795,7 @@ class Server {
 	 * @return \Comet\UserProfileConfig[] An array with string keys. 
 	 * @throws \Exception
 	 */
-	public function AdminListUsersFull()
+	public function AdminListUsersFull(): array
 	{
 		$nr = new \Comet\AdminListUsersFullRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1370,7 +1811,7 @@ class Server {
 	 * @return \Comet\ServerConfigOptionsBrandingFragment 
 	 * @throws \Exception
 	 */
-	public function AdminMetaBrandingConfigGet()
+	public function AdminMetaBrandingConfigGet(): \Comet\ServerConfigOptionsBrandingFragment
 	{
 		$nr = new \Comet\AdminMetaBrandingConfigGetRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1388,7 +1829,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminMetaBrandingConfigSet(BrandingOptions $BrandingConfig)
+	public function AdminMetaBrandingConfigSet(\Comet\BrandingOptions $BrandingConfig): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminMetaBrandingConfigSetRequest($BrandingConfig);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1404,7 +1845,7 @@ class Server {
 	 * @return \Comet\ServerConfigOptionsSoftwareBuildRoleFragment 
 	 * @throws \Exception
 	 */
-	public function AdminMetaBuildConfigGet()
+	public function AdminMetaBuildConfigGet(): \Comet\ServerConfigOptionsSoftwareBuildRoleFragment
 	{
 		$nr = new \Comet\AdminMetaBuildConfigGetRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1421,7 +1862,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminMetaBuildConfigSet(SoftwareBuildRoleOptions $SoftwareBuildRoleConfig)
+	public function AdminMetaBuildConfigSet(\Comet\SoftwareBuildRoleOptions $SoftwareBuildRoleConfig): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminMetaBuildConfigSetRequest($SoftwareBuildRoleConfig);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1432,15 +1873,34 @@ class Server {
 	 * Get log files
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 *
 	 * @return int[] 
 	 * @throws \Exception
 	 */
-	public function AdminMetaListAvailableLogDays()
+	public function AdminMetaListAvailableLogDays(): array
 	{
 		$nr = new \Comet\AdminMetaListAvailableLogDaysRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminMetaListAvailableLogDaysRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Get a ZIP file of all of the server's log files
+	 * On non-Windows platforms, log content uses LF line endings. On Windows, Comet changed from LF to CRLF line endings in 18.3.2.
+	 * This API does not automatically convert line endings; around the 18.3.2 timeframe, log content may even contain mixed line-endings.
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
+	 *
+	 * @return string 
+	 * @throws \Exception
+	 */
+	public function AdminMetaReadAllLogs(): string
+	{
+		$nr = new \Comet\AdminMetaReadAllLogsRequest();
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminMetaReadAllLogsRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
@@ -1449,12 +1909,13 @@ class Server {
 	 * This API does not automatically convert line endings; around the 18.3.2 timeframe, log content may even contain mixed line-endings.
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 *
 	 * @param int $Log A log day, selected from the options returned by the Get Log Files API
 	 * @return string 
 	 * @throws \Exception
 	 */
-	public function AdminMetaReadLogs($Log)
+	public function AdminMetaReadLogs(int $Log): string
 	{
 		$nr = new \Comet\AdminMetaReadLogsRequest($Log);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1470,7 +1931,7 @@ class Server {
 	 * @return \Comet\RemoteStorageOption[] 
 	 * @throws \Exception
 	 */
-	public function AdminMetaRemoteStorageVaultGet()
+	public function AdminMetaRemoteStorageVaultGet(): array
 	{
 		$nr = new \Comet\AdminMetaRemoteStorageVaultGetRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1478,7 +1939,7 @@ class Server {
 	}
 
 	/** 
-	 * Set Requestable Remote Storage Vault options
+	 * Set Storage template vault options
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
 	 * Access to this API may be prevented on a per-administrator basis.
@@ -1487,7 +1948,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminMetaRemoteStorageVaultSet(array $RemoteStorageOptions)
+	public function AdminMetaRemoteStorageVaultSet(array $RemoteStorageOptions): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminMetaRemoteStorageVaultSetRequest($RemoteStorageOptions);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1504,7 +1965,7 @@ class Server {
 	 * @return string 
 	 * @throws \Exception
 	 */
-	public function AdminMetaResourceGet($Hash)
+	public function AdminMetaResourceGet(string $Hash): string
 	{
 		$nr = new \Comet\AdminMetaResourceGetRequest($Hash);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1515,16 +1976,19 @@ class Server {
 	 * Upload a resource file
 	 * Resources are used to upload files within the server configuration.
 	 * The resulting resource ID is autogenerated.
-	 * The lifespan of an uploaded resource is undefined. Resources may be deleted automatically, but it should remain available until the next call to AdminMetaServerconfigSet, and will remain available for as long as it is referenced by the server configuration.
+	 * The lifespan of an uploaded resource is undefined. Resources may be deleted automatically, but it should remain available until the next call to AdminMetaServerConfigSet, and will remain available for as long as it is referenced by the server configuration.
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
 	 *
+	 * @param string $upload The uploaded file contents, as a multipart/form-data part.
 	 * @return \Comet\AdminResourceResponse 
 	 * @throws \Exception
 	 */
-	public function AdminMetaResourceNew()
+	public function AdminMetaResourceNew(string $upload): \Comet\AdminResourceResponse
 	{
-		throw new \Exception("This API is not currently representable by the Comet Server SDK");
+		$nr = new \Comet\AdminMetaResourceNewRequest($upload);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminMetaResourceNewRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
@@ -1534,12 +1998,13 @@ class Server {
 	 * Prior to 18.9.2, this API terminated the server immediately without returning a response. In 18.9.2 and later, it returns a successful response before shutting down.
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 * Access to this API may be prevented on a per-administrator basis.
 	 *
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminMetaRestartService()
+	public function AdminMetaRestartService(): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminMetaRestartServiceRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1551,6 +2016,7 @@ class Server {
 	 * This allows the Comet Server web interface to support testing different email credentials during setup.
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 * Access to this API may be prevented on a per-administrator basis.
 	 *
 	 * @param \Comet\EmailOptions $EmailOptions Updated configuration content
@@ -1558,7 +2024,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminMetaSendTestEmail(EmailOptions $EmailOptions, $Recipient)
+	public function AdminMetaSendTestEmail(\Comet\EmailOptions $EmailOptions, string $Recipient): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminMetaSendTestEmailRequest($EmailOptions, $Recipient);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1570,11 +2036,12 @@ class Server {
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
 	 * Access to this API may be prevented on a per-administrator basis.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 *
 	 * @return \Comet\ServerConfigOptions 
 	 * @throws \Exception
 	 */
-	public function AdminMetaServerConfigGet()
+	public function AdminMetaServerConfigGet(): \Comet\ServerConfigOptions
 	{
 		$nr = new \Comet\AdminMetaServerConfigGetRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1587,11 +2054,12 @@ class Server {
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
 	 * Access to this API may be prevented on a per-administrator basis.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 *
 	 * @return string[] 
 	 * @throws \Exception
 	 */
-	public function AdminMetaServerConfigNetworkInterfaces()
+	public function AdminMetaServerConfigNetworkInterfaces(): array
 	{
 		$nr = new \Comet\AdminMetaServerConfigNetworkInterfacesRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1606,12 +2074,13 @@ class Server {
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
 	 * Access to this API may be prevented on a per-administrator basis.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 *
 	 * @param \Comet\ServerConfigOptions $Config Updated configuration content
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminMetaServerConfigSet(ServerConfigOptions $Config)
+	public function AdminMetaServerConfigSet(\Comet\ServerConfigOptions $Config): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminMetaServerConfigSetRequest($Config);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1625,12 +2094,13 @@ class Server {
 	 * Prior to 18.9.2, this API terminated the server immediately without returning a response. In 18.9.2 and later, it returns a successful response before shutting down.
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 * Access to this API may be prevented on a per-administrator basis.
 	 *
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminMetaShutdownService()
+	public function AdminMetaShutdownService(): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminMetaShutdownServiceRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1645,7 +2115,7 @@ class Server {
 	 * @return \Comet\SoftwareUpdateNewsResponse 
 	 * @throws \Exception
 	 */
-	public function AdminMetaSoftwareUpdateNews()
+	public function AdminMetaSoftwareUpdateNews(): \Comet\SoftwareUpdateNewsResponse
 	{
 		$nr = new \Comet\AdminMetaSoftwareUpdateNewsRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1662,7 +2132,7 @@ class Server {
 	 * @return \Comet\StatResult[] An array with int keys. 
 	 * @throws \Exception
 	 */
-	public function AdminMetaStats($Simple)
+	public function AdminMetaStats(bool $Simple): array
 	{
 		$nr = new \Comet\AdminMetaStatsRequest($Simple);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1678,7 +2148,7 @@ class Server {
 	 * @return \Comet\ServerMetaVersionInfo 
 	 * @throws \Exception
 	 */
-	public function AdminMetaVersion()
+	public function AdminMetaVersion(): \Comet\ServerMetaVersionInfo
 	{
 		$nr = new \Comet\AdminMetaVersionRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1693,7 +2163,7 @@ class Server {
 	 * @return \Comet\WebhookOption[] An array with string keys. 
 	 * @throws \Exception
 	 */
-	public function AdminMetaWebhookOptionsGet()
+	public function AdminMetaWebhookOptionsGet(): array
 	{
 		$nr = new \Comet\AdminMetaWebhookOptionsGetRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1710,7 +2180,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminMetaWebhookOptionsSet(array $WebhookOptions)
+	public function AdminMetaWebhookOptionsSet(array $WebhookOptions): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminMetaWebhookOptionsSetRequest($WebhookOptions);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1726,7 +2196,7 @@ class Server {
 	 * @return \Comet\NewsEntry[] An array with string keys. 
 	 * @throws \Exception
 	 */
-	public function AdminNewsGetAll()
+	public function AdminNewsGetAll(): array
 	{
 		$nr = new \Comet\AdminNewsGetAllRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1743,7 +2213,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminNewsRemove($NewsItem)
+	public function AdminNewsRemove(string $NewsItem): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminNewsRemoveRequest($NewsItem);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1760,11 +2230,67 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminNewsSubmit($NewsContent)
+	public function AdminNewsSubmit(string $NewsContent): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminNewsSubmitRequest($NewsContent);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminNewsSubmitRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Delete an organization and all related users
+	 * 
+	 * Prior to Comet 22.6.0, this API was documented as returning the OrganizationResponse type. However, it always has returned only a CometAPIResponseMessage.
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
+	 *
+	 * @param string $OrganizationID (No description available) (optional)
+	 * @param \Comet\UninstallConfig $UninstallConfig Uninstall software configuration (optional)
+	 * @return \Comet\APIResponseMessage 
+	 * @throws \Exception
+	 */
+	public function AdminOrganizationDelete(string $OrganizationID = null, \Comet\UninstallConfig $UninstallConfig = null): \Comet\APIResponseMessage
+	{
+		$nr = new \Comet\AdminOrganizationDeleteRequest($OrganizationID, $UninstallConfig);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminOrganizationDeleteRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * List Organizations
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
+	 *
+	 * @return \Comet\Organization[] An array with string keys. 
+	 * @throws \Exception
+	 */
+	public function AdminOrganizationList(): array
+	{
+		$nr = new \Comet\AdminOrganizationListRequest();
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminOrganizationListRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Create or Update an Organization
+	 * 
+	 * Prior to Comet 22.6.0, the 'ID' and 'Organization' fields were not present in the response.
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
+	 *
+	 * @param string $OrganizationID (No description available) (optional)
+	 * @param \Comet\Organization $Organization (No description available) (optional)
+	 * @return \Comet\OrganizationResponse 
+	 * @throws \Exception
+	 */
+	public function AdminOrganizationSet(string $OrganizationID = null, \Comet\Organization $Organization = null): \Comet\OrganizationResponse
+	{
+		$nr = new \Comet\AdminOrganizationSetRequest($OrganizationID, $Organization);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminOrganizationSetRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
@@ -1777,7 +2303,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminPoliciesDelete($PolicyID)
+	public function AdminPoliciesDelete(string $PolicyID): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminPoliciesDeleteRequest($PolicyID);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1795,7 +2321,7 @@ class Server {
 	 * @return \Comet\GetGroupPolicyResponse 
 	 * @throws \Exception
 	 */
-	public function AdminPoliciesGet($PolicyID)
+	public function AdminPoliciesGet(string $PolicyID): \Comet\GetGroupPolicyResponse
 	{
 		$nr = new \Comet\AdminPoliciesGetRequest($PolicyID);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1804,32 +2330,36 @@ class Server {
 
 	/** 
 	 * List all policy object names
+	 * For the top-level organization, the API result includes all policies for all organizations, unless the TargetOrganization parameter is present.
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
 	 * This API requires the Auth Role to be enabled.
 	 *
+	 * @param string $TargetOrganization If present, list the policies belonging to another organization. Only allowed for administrator accounts in the top-level organization. (>= 22.3.7) (optional)
 	 * @return string[] An array with string keys. 
 	 * @throws \Exception
 	 */
-	public function AdminPoliciesList()
+	public function AdminPoliciesList(string $TargetOrganization = null): array
 	{
-		$nr = new \Comet\AdminPoliciesListRequest();
+		$nr = new \Comet\AdminPoliciesListRequest($TargetOrganization);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminPoliciesListRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
 	 * Get all policy objects
+	 * For the top-level organization, the API result includes all policies for all organizations, unless the TargetOrganization parameter is present.
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
 	 * This API requires the Auth Role to be enabled.
 	 *
+	 * @param string $TargetOrganization If present, list the policies belonging to another organization. Only allowed for administrator accounts in the top-level organization. (>= 22.3.7) (optional)
 	 * @return \Comet\GroupPolicy[] An array with string keys. 
 	 * @throws \Exception
 	 */
-	public function AdminPoliciesListFull()
+	public function AdminPoliciesListFull(string $TargetOrganization = null): array
 	{
-		$nr = new \Comet\AdminPoliciesListFullRequest();
+		$nr = new \Comet\AdminPoliciesListFullRequest($TargetOrganization);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminPoliciesListFullRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
@@ -1844,7 +2374,7 @@ class Server {
 	 * @return \Comet\CreateGroupPolicyResponse 
 	 * @throws \Exception
 	 */
-	public function AdminPoliciesNew(GroupPolicy $Policy)
+	public function AdminPoliciesNew(\Comet\GroupPolicy $Policy): \Comet\CreateGroupPolicyResponse
 	{
 		$nr = new \Comet\AdminPoliciesNewRequest($Policy);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1865,7 +2395,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminPoliciesSet($PolicyID, GroupPolicy $Policy, $CheckPolicyHash = null)
+	public function AdminPoliciesSet(string $PolicyID, \Comet\GroupPolicy $Policy, string $CheckPolicyHash = null): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminPoliciesSetRequest($PolicyID, $Policy, $CheckPolicyHash);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1884,7 +2414,7 @@ class Server {
 	 * @return \Comet\EmailReportGeneratedPreview 
 	 * @throws \Exception
 	 */
-	public function AdminPreviewUserEmailReport($TargetUser, EmailReportConfig $EmailReportConfig, $EmailAddress = null)
+	public function AdminPreviewUserEmailReport(string $TargetUser, \Comet\EmailReportConfig $EmailReportConfig, string $EmailAddress = null): \Comet\EmailReportGeneratedPreview
 	{
 		$nr = new \Comet\AdminPreviewUserEmailReportRequest($TargetUser, $EmailReportConfig, $EmailAddress);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1895,11 +2425,12 @@ class Server {
 	 * Get Replication status
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 *
 	 * @return \Comet\ReplicatorStateAPIResponse[] 
 	 * @throws \Exception
 	 */
-	public function AdminReplicationState()
+	public function AdminReplicationState(): array
 	{
 		$nr = new \Comet\AdminReplicationStateRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1910,17 +2441,18 @@ class Server {
 	 * Request a new Storage Vault on behalf of a user
 	 * This action does not respect the "Prevent creating new Storage Vaults (via Request)" policy setting. New Storage Vaults can be requested regardless of the policy setting.
 	 * Prior to Comet 19.8.0, the response type was CometAPIResponseMessage (i.e. no DestinationID field in response).
+	 * The StorageProvider must exist for the target user account's organization.
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
 	 * This API requires the Auth Role to be enabled.
 	 *
 	 * @param string $TargetUser The user to receive the new Storage Vault
-	 * @param string $StorageProvider ID for the Requestable destination
+	 * @param string $StorageProvider ID for the storage template destination
 	 * @param string $SelfAddress The external URL for this server. Used to resolve conflicts (optional)
 	 * @return \Comet\RequestStorageVaultResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminRequestStorageVault($TargetUser, $StorageProvider, $SelfAddress = null)
+	public function AdminRequestStorageVault(string $TargetUser, string $StorageProvider, string $SelfAddress = null): \Comet\RequestStorageVaultResponseMessage
 	{
 		if ($SelfAddress === null) {
 			$SelfAddress = $this->server_url;
@@ -1937,12 +2469,13 @@ class Server {
 	 * You must supply administrator authentication credentials to use this API.
 	 * This API requires the Auth Role to be enabled.
 	 *
+	 * @param string $TargetOrganization If present, list the storage template options belonging to another organization. Only allowed for administrator accounts in the top-level organization. (>= 22.3.7) (optional)
 	 * @return string[] An array with string keys. 
 	 * @throws \Exception
 	 */
-	public function AdminRequestStorageVaultProviders()
+	public function AdminRequestStorageVaultProviders(string $TargetOrganization = null): array
 	{
-		$nr = new \Comet\AdminRequestStorageVaultProvidersRequest();
+		$nr = new \Comet\AdminRequestStorageVaultProvidersRequest($TargetOrganization);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminRequestStorageVaultProvidersRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
@@ -1960,7 +2493,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminResetUserPassword($TargetUser, $NewPassword, $OldPassword)
+	public function AdminResetUserPassword(string $TargetUser, string $NewPassword, string $OldPassword): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminResetUserPasswordRequest($TargetUser, $NewPassword, $OldPassword);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1979,7 +2512,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminRevokeDevice($TargetUser, $TargetDevice)
+	public function AdminRevokeDevice(string $TargetUser, string $TargetDevice): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminRevokeDeviceRequest($TargetUser, $TargetDevice);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -1997,7 +2530,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminSetUserProfile($TargetUser, UserProfileConfig $ProfileData)
+	public function AdminSetUserProfile(string $TargetUser, \Comet\UserProfileConfig $ProfileData): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminSetUserProfileRequest($TargetUser, $ProfileData);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -2018,11 +2551,30 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminSetUserProfileHash($TargetUser, UserProfileConfig $ProfileData, $RequireHash)
+	public function AdminSetUserProfileHash(string $TargetUser, \Comet\UserProfileConfig $ProfileData, string $RequireHash): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminSetUserProfileHashRequest($TargetUser, $ProfileData, $RequireHash);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminSetUserProfileHashRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Retrieve properties for a single bucket
+	 * This API can also be used to refresh the size measurement for a single bucket by passing a valid AfterTimestamp parameter.
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * This API requires the Storage Role to be enabled.
+	 *
+	 * @param string $BucketID Bucket ID
+	 * @param int $AfterTimestamp Allow a stale size measurement if it is at least as new as the supplied Unix timestamp. Timestamps in the future may produce a result clamped down to the Comet Server's current time. If not present, the size measurement may be arbitrarily stale. (optional)
+	 * @return \Comet\BucketProperties 
+	 * @throws \Exception
+	 */
+	public function AdminStorageBucketProperties(string $BucketID, int $AfterTimestamp = null): \Comet\BucketProperties
+	{
+		$nr = new \Comet\AdminStorageBucketPropertiesRequest($BucketID, $AfterTimestamp);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminStorageBucketPropertiesRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
@@ -2036,7 +2588,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminStorageDeleteBucket($BucketID)
+	public function AdminStorageDeleteBucket(string $BucketID): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminStorageDeleteBucketRequest($BucketID);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -2049,12 +2601,13 @@ class Server {
 	 * You must supply administrator authentication credentials to use this API.
 	 * Access to this API may be prevented on a per-administrator basis.
 	 * This API requires the Storage Role to be enabled.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 *
-	 * @param string $BucketID Selected bucket name
+	 * @param string $BucketID (This parameter is not used) (optional)
 	 * @return \Comet\StorageFreeSpaceInfo 
 	 * @throws \Exception
 	 */
-	public function AdminStorageFreeSpace($BucketID)
+	public function AdminStorageFreeSpace(string $BucketID = null): \Comet\StorageFreeSpaceInfo
 	{
 		$nr = new \Comet\AdminStorageFreeSpaceRequest($BucketID);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -2070,11 +2623,30 @@ class Server {
 	 * @return \Comet\BucketProperties[] An array with string keys. 
 	 * @throws \Exception
 	 */
-	public function AdminStorageListBuckets()
+	public function AdminStorageListBuckets(): array
 	{
 		$nr = new \Comet\AdminStorageListBucketsRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminStorageListBucketsRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Ping a storage destination
+	 * 
+	 * You must supply administrator authentication credentials to use this API.
+	 * Access to this API may be prevented on a per-administrator basis.
+	 * This API requires the Storage Role to be enabled.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
+	 *
+	 * @param \Comet\DestinationLocation $ExtraData The destination location settings
+	 * @return \Comet\APIResponseMessage 
+	 * @throws \Exception
+	 */
+	public function AdminStoragePingDestination(\Comet\DestinationLocation $ExtraData): \Comet\APIResponseMessage
+	{
+		$nr = new \Comet\AdminStoragePingDestinationRequest($ExtraData);
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\AdminStoragePingDestinationRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
@@ -2088,12 +2660,13 @@ class Server {
 	 * @param string $SetBucketValue Bucket ID (optional)
 	 * @param string $SetKeyHashFormat Bucket key hashing format (optional)
 	 * @param string $SetKeyHashValue Bucket key hash (optional)
+	 * @param string $SetOrganizationID Target organization ID (>= 20.9.0) (optional)
 	 * @return \Comet\AddBucketResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminStorageRegisterBucket($SetBucketValue = null, $SetKeyHashFormat = null, $SetKeyHashValue = null)
+	public function AdminStorageRegisterBucket(string $SetBucketValue = null, string $SetKeyHashFormat = null, string $SetKeyHashValue = null, string $SetOrganizationID = null): \Comet\AddBucketResponseMessage
 	{
-		$nr = new \Comet\AdminStorageRegisterBucketRequest($SetBucketValue, $SetKeyHashFormat, $SetKeyHashValue);
+		$nr = new \Comet\AdminStorageRegisterBucketRequest($SetBucketValue, $SetKeyHashFormat, $SetKeyHashValue, $SetOrganizationID);
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminStorageRegisterBucketRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
@@ -2102,6 +2675,7 @@ class Server {
 	 * Start a new software update campaign
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 * This API requires the Software Build Role to be enabled.
 	 * This API requires the Auth Role to be enabled.
 	 *
@@ -2109,7 +2683,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function AdminUpdateCampaignStart(UpdateCampaignOptions $Options)
+	public function AdminUpdateCampaignStart(\Comet\UpdateCampaignOptions $Options): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\AdminUpdateCampaignStartRequest($Options);
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -2120,17 +2694,31 @@ class Server {
 	 * Get current campaign status
 	 * 
 	 * You must supply administrator authentication credentials to use this API.
+	 * This API is only available for administrator accounts in the top-level Organization, not in any other Organization.
 	 * This API requires the Software Build Role to be enabled.
 	 * This API requires the Auth Role to be enabled.
 	 *
 	 * @return \Comet\UpdateCampaignStatus 
 	 * @throws \Exception
 	 */
-	public function AdminUpdateCampaignStatus()
+	public function AdminUpdateCampaignStatus(): \Comet\UpdateCampaignStatus
 	{
 		$nr = new \Comet\AdminUpdateCampaignStatusRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
 		return \Comet\AdminUpdateCampaignStatusRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
+	}
+
+	/** 
+	 * Retreve basic information about this Comet Server
+	 *
+	 * @return \Comet\ServerMetaBrandingProperties 
+	 * @throws \Exception
+	 */
+	public function BrandingProps(): \Comet\ServerMetaBrandingProperties
+	{
+		$nr = new \Comet\BrandingPropsRequest();
+		$response = $this->client->send($this->AsPSR7($nr));
+		return \Comet\BrandingPropsRequest::ProcessResponse($response->getStatusCode(), (string)$response->getBody());
 	}
 
 	/** 
@@ -2141,7 +2729,7 @@ class Server {
 	 * @return \Comet\SessionKeyRegeneratedResponse 
 	 * @throws \Exception
 	 */
-	public function HybridSessionStart()
+	public function HybridSessionStart(): \Comet\SessionKeyRegeneratedResponse
 	{
 		$nr = new \Comet\HybridSessionStartRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -2157,7 +2745,7 @@ class Server {
 	 * @return \Comet\APIResponseMessage 
 	 * @throws \Exception
 	 */
-	public function UserWebSessionRevoke()
+	public function UserWebSessionRevoke(): \Comet\APIResponseMessage
 	{
 		$nr = new \Comet\UserWebSessionRevokeRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -2173,7 +2761,7 @@ class Server {
 	 * @return \Comet\SessionKeyRegeneratedResponse 
 	 * @throws \Exception
 	 */
-	public function UserWebSessionStart()
+	public function UserWebSessionStart(): \Comet\SessionKeyRegeneratedResponse
 	{
 		$nr = new \Comet\UserWebSessionStartRequest();
 		$response = $this->client->send($this->AsPSR7($nr));
@@ -2186,21 +2774,82 @@ class Server {
 	 * @param NetworkRequest $nr
 	 * @return \Psr\Http\Message\RequestInterface
 	 */
-	public function AsPSR7(NetworkRequest $nr) {
-
+	public function AsPSR7(NetworkRequest $nr): \Psr\Http\Message\RequestInterface {
 		$params = $nr->Parameters();
-		$params['Username'] = $this->username;
-		$params['AuthType'] = 'Password';
-		$params['Password'] = $this->password;
+		
+		$contentType = $nr->ContentType();
+		
+		$headers = [];
+		if ($this->language !== null) {
+			$headers['Accept-Language'] = str_replace('_', '-', $this->language).';q=0.9, en;q=0.8, *;q=0.5';
+		}
+
+		$body = '';
+
+		if ($contentType === 'application/x-www-form-urlencoded') {
+			
+			// Authentication parameters go in the body
+			$params['Username'] = $this->username;
+			$params['AuthType'] = 'Password';
+			$params['Password'] = $this->password;
+			if (strlen($this->TOTPCode) > 0) {
+				$params['AuthType'] = 'PasswordTOTP';
+				$params['TOTP']     = $this->TOTPCode;
+			}
+
+			$headers['Content-Type'] = $contentType;
+			$body = http_build_query($params);
+
+		} else if ($contentType === 'multipart/form-data') {
+			
+			// Authentication parameters go in the headers
+			$headers['X-Comet-Admin-Username'] = $this->username;
+			$headers['X-Comet-Admin-AuthType'] = 'Password';
+			$headers['X-Comet-Admin-Password'] = $this->password;
+			if (strlen($this->TOTPCode) > 0) {
+				$headers['X-Comet-Admin-AuthType'] = 'PasswordTOTP';
+				$headers['X-Comet-Admin-TOTP']     = $this->TOTPCode;
+			}
+
+			$boundary = '-------------' . uniqid();
+			$headers['Content-Type'] = $contentType.'; boundary='.$boundary;
+			$body = self::http_build_query_multipart($params, $boundary);
+
+		} else {
+			throw new \Exception("Unexpected ContentType '{$contentType}'");
+
+		}
+
+		$headers['Content-Length'] = strlen($body);
 
 		return new \GuzzleHttp\Psr7\Request(
 			$nr->Method(),
 			$this->server_url . ltrim($nr->Endpoint(), '/'),
-			[
-				'Content-Type' => 'application/x-www-form-urlencoded',
-			],
-			http_build_query($params)
+			$headers,
+			$body
 		);
+	}
+
+	/**
+	 * http_build_query_multipart is a version of \http_build_query() that produces a
+	 * multipart/form-data POST body instead of an application/x-www-form-urlencoded one.
+	 * 
+	 * @param array $params POST parameters
+	 * @param string $boundary Boundary with leading hyphens
+	 * @return string POST body
+	 */ 
+	protected static function http_build_query_multipart(array $params, string $boundary): string {
+		$ret = '';
+
+		foreach($params as $k => $v) {
+			$ret .= "--{$boundary}\r\n";
+			$ret .= "Content-Disposition: form-data; name=\"{$k}\"; filename=\"{$k}\"\r\n\r\n";
+			$ret .= $v . "\r\n";
+		}
+
+		$ret .= "--{$boundary}--\r\n";
+
+		return $ret;
 	}
 
 }

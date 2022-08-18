@@ -1,91 +1,101 @@
 <?php
 
 /**
- * Copyright (c) 2018-2020 Comet Licensing Ltd.
+ * Copyright (c) 2018-2022 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
- * 
+ *
  * SPDX-License-Identifier: MIT
  */
 
 namespace Comet;
 
 class BackupRuleConfig {
-	
+
 	/**
 	 * @var string
 	 */
 	public $Description = "";
-	
+
 	/**
 	 * @var int
 	 */
 	public $CreateTime = 0;
-	
+
 	/**
 	 * @var int
 	 */
 	public $ModifyTime = 0;
-	
+
 	/**
 	 * @var string[]
 	 */
 	public $PreExec = [];
-	
+
+	/**
+	 * @var string[]
+	 */
+	public $ThawExec = [];
+
 	/**
 	 * @var string[]
 	 */
 	public $PostExec = [];
-	
+
 	/**
 	 * @var string
 	 */
 	public $Source = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $Destination = "";
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $SkipAlreadyRunning = false;
-	
+
 	/**
 	 * @var int
 	 */
 	public $StopAfter = 0;
-	
+
 	/**
 	 * @var int
 	 */
 	public $LimitVaultSpeedBps = 0;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $ReduceDiskConcurrency = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $UseOnDiskIndexes = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $AllowZeroFilesSuccess = false;
-	
+
+	/**
+	 * @var int
+	 */
+	public $AutoRetentionLevel = 0;
+
 	/**
 	 * @var \Comet\ScheduleConfig[]
 	 */
 	public $Schedules = [];
-	
+
 	/**
 	 * @var \Comet\BackupRuleEventTriggers
 	 */
 	public $EventTriggers = null;
-	
+
 	/**
 	 * Preserve unknown properties when dealing with future server versions.
 	 *
@@ -93,7 +103,7 @@ class BackupRuleConfig {
 	 * @var array
 	 */
 	private $__unknown_properties = [];
-	
+
 	/**
 	 * Replace the content of this BackupRuleConfig object from a PHP \stdClass.
 	 * The data could be supplied from an API call after json_decode(...); or generated manually.
@@ -120,6 +130,15 @@ class BackupRuleConfig {
 				}
 			}
 			$this->PreExec = $val_2;
+		}
+		if (property_exists($sc, 'ThawExec')) {
+			$val_2 = [];
+			if ($sc->ThawExec !== null) {
+				for($i_2 = 0; $i_2 < count($sc->ThawExec); ++$i_2) {
+					$val_2[] = (string)($sc->ThawExec[$i_2]);
+				}
+			}
+			$this->ThawExec = $val_2;
 		}
 		if (property_exists($sc, 'PostExec')) {
 			$val_2 = [];
@@ -154,6 +173,9 @@ class BackupRuleConfig {
 		if (property_exists($sc, 'AllowZeroFilesSuccess')) {
 			$this->AllowZeroFilesSuccess = (bool)($sc->AllowZeroFilesSuccess);
 		}
+		if (property_exists($sc, 'AutoRetentionLevel')) {
+			$this->AutoRetentionLevel = (int)($sc->AutoRetentionLevel);
+		}
 		if (property_exists($sc, 'Schedules')) {
 			$val_2 = [];
 			if ($sc->Schedules !== null) {
@@ -182,6 +204,7 @@ class BackupRuleConfig {
 			case 'CreateTime':
 			case 'ModifyTime':
 			case 'PreExec':
+			case 'ThawExec':
 			case 'PostExec':
 			case 'Source':
 			case 'Destination':
@@ -191,6 +214,7 @@ class BackupRuleConfig {
 			case 'ReduceDiskConcurrency':
 			case 'UseOnDiskIndexes':
 			case 'AllowZeroFilesSuccess':
+			case 'AutoRetentionLevel':
 			case 'Schedules':
 			case 'EventTriggers':
 				break;
@@ -199,20 +223,20 @@ class BackupRuleConfig {
 			}
 		}
 	}
-	
+
 	/**
 	 * Coerce a stdClass into a new strongly-typed BackupRuleConfig object.
 	 *
 	 * @param \stdClass $sc Object data as stdClass
 	 * @return BackupRuleConfig
 	 */
-	public static function createFromStdclass(\stdClass $sc)
+	public static function createFromStdclass(\stdClass $sc): \Comet\BackupRuleConfig
 	{
 		$retn = new BackupRuleConfig();
 		$retn->inflateFrom($sc);
 		return $retn;
 	}
-	
+
 	/**
 	 * Coerce a plain PHP array into a new strongly-typed BackupRuleConfig object.
 	 * Because the Comet Server requires strict distinction between empty objects ({}) and arrays ([]),
@@ -221,38 +245,22 @@ class BackupRuleConfig {
 	 * @param array $arr Object data as PHP array
 	 * @return BackupRuleConfig
 	 */
-	public static function createFromArray(array $arr)
+	public static function createFromArray(array $arr): \Comet\BackupRuleConfig
 	{
-		$stdClass = json_decode(json_encode($arr));
+		$stdClass = json_decode(json_encode($arr, JSON_UNESCAPED_SLASHES));
 		if (is_array($stdClass) && count($stdClass) === 0) {
 			$stdClass = new \stdClass();
 		}
 		return self::createFromStdclass($stdClass);
 	}
-	
-	/**
-	 * Coerce a plain PHP array into a new strongly-typed BackupRuleConfig object.
-	 * Because the Comet Server requires strict distinction between empty objects ({}) and arrays ([]),
-	 * the result of this method may not be safe to re-submit to the Comet Server.
-	 *
-	 * @deprecated 3.0.0 Unsafe for round-trip server traversal. You should either 
-	 *             (A) acknowledge this and continue by switching to createFromArray, or
-	 *             (b) switch to the roundtrip-safe createFromStdclass alternative.
-	 * @param array $arr Object data as PHP array
-	 * @return BackupRuleConfig
-	 */
-	public static function createFrom(array $arr)
-	{
-		return self::createFromArray($arr);
-	}
-	
+
 	/**
 	 * Coerce a JSON string into a new strongly-typed BackupRuleConfig object.
 	 *
 	 * @param string $JsonString Object data as JSON string
 	 * @return BackupRuleConfig
 	 */
-	public static function createFromJSON($JsonString)
+	public static function createFromJSON(string $JsonString): \Comet\BackupRuleConfig
 	{
 		$decodedJsonObject = json_decode($JsonString); // as stdClass
 		if (\json_last_error() != \JSON_ERROR_NONE) {
@@ -262,7 +270,7 @@ class BackupRuleConfig {
 		$retn->inflateFrom($decodedJsonObject);
 		return $retn;
 	}
-	
+
 	/**
 	 * Convert this BackupRuleConfig object into a plain PHP array.
 	 *
@@ -271,7 +279,7 @@ class BackupRuleConfig {
 	 * @param bool $for_json_encode Represent empty key-value maps as \stdClass instead of plain PHP arrays
 	 * @return array
 	 */
-	public function toArray($for_json_encode = false)
+	public function toArray(bool $for_json_encode = false): array
 	{
 		$ret = [];
 		$ret["Description"] = $this->Description;
@@ -284,6 +292,14 @@ class BackupRuleConfig {
 				$c0[] = $val0;
 			}
 			$ret["PreExec"] = $c0;
+		}
+		{
+			$c0 = [];
+			for($i0 = 0; $i0 < count($this->ThawExec); ++$i0) {
+				$val0 = $this->ThawExec[$i0];
+				$c0[] = $val0;
+			}
+			$ret["ThawExec"] = $c0;
 		}
 		{
 			$c0 = [];
@@ -301,6 +317,7 @@ class BackupRuleConfig {
 		$ret["ReduceDiskConcurrency"] = $this->ReduceDiskConcurrency;
 		$ret["UseOnDiskIndexes"] = $this->UseOnDiskIndexes;
 		$ret["AllowZeroFilesSuccess"] = $this->AllowZeroFilesSuccess;
+		$ret["AutoRetentionLevel"] = $this->AutoRetentionLevel;
 		{
 			$c0 = [];
 			for($i0 = 0; $i0 < count($this->Schedules); ++$i0) {
@@ -318,47 +335,47 @@ class BackupRuleConfig {
 		} else {
 			$ret["EventTriggers"] = $this->EventTriggers->toArray($for_json_encode);
 		}
-		
+
 		// Reinstate unknown properties from future server versions
 		foreach($this->__unknown_properties as $k => $v) {
 			$ret[$k] = $v;
 		}
-		
+
 		return $ret;
 	}
-	
+
 	/**
 	 * Convert this object to a JSON string.
 	 * The result is suitable to submit to the Comet Server API.
 	 *
 	 * @return string
 	 */
-	public function toJSON()
+	public function toJSON(): string
 	{
 		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
-			return json_encode($arr);
+			return json_encode($arr, JSON_UNESCAPED_SLASHES);
 		}
 	}
-	
+
 	/**
 	 * Convert this object to a PHP \stdClass.
 	 * This may be a more convenient format for working with unknown class properties.
 	 *
 	 * @return \stdClass
 	 */
-	public function toStdClass()
+	public function toStdClass(): \stdClass
 	{
 		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {
-			return json_decode(json_encode($arr));
+			return json_decode(json_encode($arr, JSON_UNESCAPED_SLASHES));
 		}
 	}
-	
+
 	/**
 	 * Erase any preserved object properties that are unknown to this Comet Server SDK.
 	 *
@@ -371,6 +388,6 @@ class BackupRuleConfig {
 			$this->EventTriggers->RemoveUnknownProperties();
 		}
 	}
-	
+
 }
 

@@ -1,51 +1,56 @@
 <?php
 
 /**
- * Copyright (c) 2018-2020 Comet Licensing Ltd.
+ * Copyright (c) 2018-2022 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
- * 
+ *
  * SPDX-License-Identifier: MIT
  */
 
 namespace Comet;
 
 class S3DestinationLocation {
-	
+
 	/**
 	 * @var string
 	 */
 	public $S3Server = "";
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $S3UsesTLS = false;
-	
+
 	/**
 	 * @var string
 	 */
 	public $S3AccessKey = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $S3SecretKey = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $S3BucketName = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $S3Subdir = "";
-	
+
+	/**
+	 * @var string
+	 */
+	public $S3CustomRegion = "";
+
 	/**
 	 * @var boolean
 	 */
 	public $S3UsesV2Signing = false;
-	
+
 	/**
 	 * Preserve unknown properties when dealing with future server versions.
 	 *
@@ -53,7 +58,7 @@ class S3DestinationLocation {
 	 * @var array
 	 */
 	private $__unknown_properties = [];
-	
+
 	/**
 	 * Replace the content of this S3DestinationLocation object from a PHP \stdClass.
 	 * The data could be supplied from an API call after json_decode(...); or generated manually.
@@ -81,6 +86,9 @@ class S3DestinationLocation {
 		if (property_exists($sc, 'S3Subdir')) {
 			$this->S3Subdir = (string)($sc->S3Subdir);
 		}
+		if (property_exists($sc, 'S3CustomRegion')) {
+			$this->S3CustomRegion = (string)($sc->S3CustomRegion);
+		}
 		if (property_exists($sc, 'S3UsesV2Signing')) {
 			$this->S3UsesV2Signing = (bool)($sc->S3UsesV2Signing);
 		}
@@ -92,6 +100,7 @@ class S3DestinationLocation {
 			case 'S3SecretKey':
 			case 'S3BucketName':
 			case 'S3Subdir':
+			case 'S3CustomRegion':
 			case 'S3UsesV2Signing':
 				break;
 			default:
@@ -99,20 +108,20 @@ class S3DestinationLocation {
 			}
 		}
 	}
-	
+
 	/**
 	 * Coerce a stdClass into a new strongly-typed S3DestinationLocation object.
 	 *
 	 * @param \stdClass $sc Object data as stdClass
 	 * @return S3DestinationLocation
 	 */
-	public static function createFromStdclass(\stdClass $sc)
+	public static function createFromStdclass(\stdClass $sc): \Comet\S3DestinationLocation
 	{
 		$retn = new S3DestinationLocation();
 		$retn->inflateFrom($sc);
 		return $retn;
 	}
-	
+
 	/**
 	 * Coerce a plain PHP array into a new strongly-typed S3DestinationLocation object.
 	 * Because the Comet Server requires strict distinction between empty objects ({}) and arrays ([]),
@@ -121,38 +130,22 @@ class S3DestinationLocation {
 	 * @param array $arr Object data as PHP array
 	 * @return S3DestinationLocation
 	 */
-	public static function createFromArray(array $arr)
+	public static function createFromArray(array $arr): \Comet\S3DestinationLocation
 	{
-		$stdClass = json_decode(json_encode($arr));
+		$stdClass = json_decode(json_encode($arr, JSON_UNESCAPED_SLASHES));
 		if (is_array($stdClass) && count($stdClass) === 0) {
 			$stdClass = new \stdClass();
 		}
 		return self::createFromStdclass($stdClass);
 	}
-	
-	/**
-	 * Coerce a plain PHP array into a new strongly-typed S3DestinationLocation object.
-	 * Because the Comet Server requires strict distinction between empty objects ({}) and arrays ([]),
-	 * the result of this method may not be safe to re-submit to the Comet Server.
-	 *
-	 * @deprecated 3.0.0 Unsafe for round-trip server traversal. You should either 
-	 *             (A) acknowledge this and continue by switching to createFromArray, or
-	 *             (b) switch to the roundtrip-safe createFromStdclass alternative.
-	 * @param array $arr Object data as PHP array
-	 * @return S3DestinationLocation
-	 */
-	public static function createFrom(array $arr)
-	{
-		return self::createFromArray($arr);
-	}
-	
+
 	/**
 	 * Coerce a JSON string into a new strongly-typed S3DestinationLocation object.
 	 *
 	 * @param string $JsonString Object data as JSON string
 	 * @return S3DestinationLocation
 	 */
-	public static function createFromJSON($JsonString)
+	public static function createFromJSON(string $JsonString): \Comet\S3DestinationLocation
 	{
 		$decodedJsonObject = json_decode($JsonString); // as stdClass
 		if (\json_last_error() != \JSON_ERROR_NONE) {
@@ -162,7 +155,7 @@ class S3DestinationLocation {
 		$retn->inflateFrom($decodedJsonObject);
 		return $retn;
 	}
-	
+
 	/**
 	 * Convert this S3DestinationLocation object into a plain PHP array.
 	 *
@@ -171,7 +164,7 @@ class S3DestinationLocation {
 	 * @param bool $for_json_encode Represent empty key-value maps as \stdClass instead of plain PHP arrays
 	 * @return array
 	 */
-	public function toArray($for_json_encode = false)
+	public function toArray(bool $for_json_encode = false): array
 	{
 		$ret = [];
 		$ret["S3Server"] = $this->S3Server;
@@ -180,48 +173,49 @@ class S3DestinationLocation {
 		$ret["S3SecretKey"] = $this->S3SecretKey;
 		$ret["S3BucketName"] = $this->S3BucketName;
 		$ret["S3Subdir"] = $this->S3Subdir;
+		$ret["S3CustomRegion"] = $this->S3CustomRegion;
 		$ret["S3UsesV2Signing"] = $this->S3UsesV2Signing;
-		
+
 		// Reinstate unknown properties from future server versions
 		foreach($this->__unknown_properties as $k => $v) {
 			$ret[$k] = $v;
 		}
-		
+
 		return $ret;
 	}
-	
+
 	/**
 	 * Convert this object to a JSON string.
 	 * The result is suitable to submit to the Comet Server API.
 	 *
 	 * @return string
 	 */
-	public function toJSON()
+	public function toJSON(): string
 	{
 		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
-			return json_encode($arr);
+			return json_encode($arr, JSON_UNESCAPED_SLASHES);
 		}
 	}
-	
+
 	/**
 	 * Convert this object to a PHP \stdClass.
 	 * This may be a more convenient format for working with unknown class properties.
 	 *
 	 * @return \stdClass
 	 */
-	public function toStdClass()
+	public function toStdClass(): \stdClass
 	{
 		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {
-			return json_decode(json_encode($arr));
+			return json_decode(json_encode($arr, JSON_UNESCAPED_SLASHES));
 		}
 	}
-	
+
 	/**
 	 * Erase any preserved object properties that are unknown to this Comet Server SDK.
 	 *
@@ -231,6 +225,6 @@ class S3DestinationLocation {
 	{
 		$this->__unknown_properties = [];
 	}
-	
+
 }
 

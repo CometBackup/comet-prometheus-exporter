@@ -1,151 +1,177 @@
 <?php
 
 /**
- * Copyright (c) 2018-2020 Comet Licensing Ltd.
+ * Copyright (c) 2018-2022 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
- * 
+ *
  * SPDX-License-Identifier: MIT
  */
 
 namespace Comet;
 
+/**
+ * This is the main data structure for a user's profile.
+ */
 class UserProfileConfig {
-	
+
 	/**
 	 * @var string
 	 */
 	public $Username = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $AccountName = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $LocalTimezone = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $LanguageCode = "";
-	
+
+	/**
+	 * Tenant
+	 *
+	 * @var string
+	 */
+	public $OrganizationID = "";
+
 	/**
 	 * @var string[]
 	 */
 	public $Emails = [];
-	
+
 	/**
 	 * @var \Comet\UserCustomEmailSettings[] An array with string keys.
 	 */
 	public $OverrideEmailSettings = [];
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $SendEmailReports = false;
-	
+
 	/**
+	 * Storage Vaults
+	 *
 	 * @var \Comet\DestinationConfig[] An array with string keys.
 	 */
 	public $Destinations = [];
-	
+
 	/**
+	 * Protected Items
+	 *
 	 * @var \Comet\SourceConfig[] An array with string keys.
 	 */
 	public $Sources = [];
-	
+
 	/**
 	 * @var \Comet\BackupRuleConfig[] An array with string keys.
 	 */
 	public $BackupRules = [];
-	
+
 	/**
 	 * @var \Comet\DeviceConfig[] An array with string keys.
 	 */
 	public $Devices = [];
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $IsSuspended = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $AllProtectedItemsQuotaEnabled = false;
-	
+
 	/**
 	 * @var int
 	 */
 	public $AllProtectedItemsQuotaBytes = 0;
-	
+
 	/**
 	 * @var int
 	 */
 	public $MaximumDevices = 0;
-	
+
 	/**
+	 * If the PolicyID field is set to a non-empty string, the Comet Server will enforce the contents of
+	 * the Policy field based on the matching server's policy. Otherwise if the PolicyID field is set to an
+	 * empty string, the administrator may configure any custom values in the Policy field.
+	 *
 	 * @var string
 	 */
 	public $PolicyID = "";
-	
+
 	/**
 	 * @var \Comet\UserPolicy
 	 */
 	public $Policy = null;
-	
+
 	/**
+	 * To change the user's password, use the AdminResetUserPassword API instead of accessing these fields
+	 * directly. Otherwise, other encrypted fields in the user profile may become corrupted.
+	 *
 	 * @var int
 	 */
 	public $PasswordFormat = 0;
-	
+
 	/**
 	 * @var string
 	 */
 	public $PasswordHash = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $PasswordRecovery = "";
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $AllowPasswordLogin = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $AllowPasswordAndTOTPLogin = false;
-	
+
 	/**
 	 * @var int
 	 */
 	public $TOTPKeyEncryptionFormat = 0;
-	
+
 	/**
 	 * @var string
 	 */
 	public $TOTPKey = "";
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $RequirePasswordChange = false;
-	
+
 	/**
 	 * @var int
 	 */
 	public $CreateTime = 0;
-	
+
 	/**
 	 * @var string
 	 */
 	public $CreationGUID = "";
-	
+
+	/**
+	 * @var \Comet\UserServerConfig
+	 */
+	public $ServerConfig = null;
+
 	/**
 	 * Preserve unknown properties when dealing with future server versions.
 	 *
@@ -153,7 +179,7 @@ class UserProfileConfig {
 	 * @var array
 	 */
 	private $__unknown_properties = [];
-	
+
 	/**
 	 * Replace the content of this UserProfileConfig object from a PHP \stdClass.
 	 * The data could be supplied from an API call after json_decode(...); or generated manually.
@@ -174,6 +200,9 @@ class UserProfileConfig {
 		}
 		if (property_exists($sc, 'LanguageCode')) {
 			$this->LanguageCode = (string)($sc->LanguageCode);
+		}
+		if (property_exists($sc, 'OrganizationID') && !is_null($sc->OrganizationID)) {
+			$this->OrganizationID = (string)($sc->OrganizationID);
 		}
 		if (property_exists($sc, 'Emails')) {
 			$val_2 = [];
@@ -296,7 +325,7 @@ class UserProfileConfig {
 		if (property_exists($sc, 'PasswordHash')) {
 			$this->PasswordHash = (string)($sc->PasswordHash);
 		}
-		if (property_exists($sc, 'PasswordRecovery')) {
+		if (property_exists($sc, 'PasswordRecovery') && !is_null($sc->PasswordRecovery)) {
 			$this->PasswordRecovery = (string)($sc->PasswordRecovery);
 		}
 		if (property_exists($sc, 'AllowPasswordLogin')) {
@@ -320,12 +349,21 @@ class UserProfileConfig {
 		if (property_exists($sc, 'CreationGUID')) {
 			$this->CreationGUID = (string)($sc->CreationGUID);
 		}
+		if (property_exists($sc, 'ServerConfig') && !is_null($sc->ServerConfig)) {
+			if (is_array($sc->ServerConfig) && count($sc->ServerConfig) === 0) {
+			// Work around edge case in json_decode--json_encode stdClass conversion
+				$this->ServerConfig = \Comet\UserServerConfig::createFromStdclass(new \stdClass());
+			} else {
+				$this->ServerConfig = \Comet\UserServerConfig::createFromStdclass($sc->ServerConfig);
+			}
+		}
 		foreach(get_object_vars($sc) as $k => $v) {
 			switch($k) {
 			case 'Username':
 			case 'AccountName':
 			case 'LocalTimezone':
 			case 'LanguageCode':
+			case 'OrganizationID':
 			case 'Emails':
 			case 'OverrideEmailSettings':
 			case 'SendEmailReports':
@@ -349,26 +387,27 @@ class UserProfileConfig {
 			case 'RequirePasswordChange':
 			case 'CreateTime':
 			case 'CreationGUID':
+			case 'ServerConfig':
 				break;
 			default:
 				$this->__unknown_properties[$k] = $v;
 			}
 		}
 	}
-	
+
 	/**
 	 * Coerce a stdClass into a new strongly-typed UserProfileConfig object.
 	 *
 	 * @param \stdClass $sc Object data as stdClass
 	 * @return UserProfileConfig
 	 */
-	public static function createFromStdclass(\stdClass $sc)
+	public static function createFromStdclass(\stdClass $sc): \Comet\UserProfileConfig
 	{
 		$retn = new UserProfileConfig();
 		$retn->inflateFrom($sc);
 		return $retn;
 	}
-	
+
 	/**
 	 * Coerce a plain PHP array into a new strongly-typed UserProfileConfig object.
 	 * Because the Comet Server requires strict distinction between empty objects ({}) and arrays ([]),
@@ -377,38 +416,22 @@ class UserProfileConfig {
 	 * @param array $arr Object data as PHP array
 	 * @return UserProfileConfig
 	 */
-	public static function createFromArray(array $arr)
+	public static function createFromArray(array $arr): \Comet\UserProfileConfig
 	{
-		$stdClass = json_decode(json_encode($arr));
+		$stdClass = json_decode(json_encode($arr, JSON_UNESCAPED_SLASHES));
 		if (is_array($stdClass) && count($stdClass) === 0) {
 			$stdClass = new \stdClass();
 		}
 		return self::createFromStdclass($stdClass);
 	}
-	
-	/**
-	 * Coerce a plain PHP array into a new strongly-typed UserProfileConfig object.
-	 * Because the Comet Server requires strict distinction between empty objects ({}) and arrays ([]),
-	 * the result of this method may not be safe to re-submit to the Comet Server.
-	 *
-	 * @deprecated 3.0.0 Unsafe for round-trip server traversal. You should either 
-	 *             (A) acknowledge this and continue by switching to createFromArray, or
-	 *             (b) switch to the roundtrip-safe createFromStdclass alternative.
-	 * @param array $arr Object data as PHP array
-	 * @return UserProfileConfig
-	 */
-	public static function createFrom(array $arr)
-	{
-		return self::createFromArray($arr);
-	}
-	
+
 	/**
 	 * Coerce a JSON string into a new strongly-typed UserProfileConfig object.
 	 *
 	 * @param string $JsonString Object data as JSON string
 	 * @return UserProfileConfig
 	 */
-	public static function createFromJSON($JsonString)
+	public static function createFromJSON(string $JsonString): \Comet\UserProfileConfig
 	{
 		$decodedJsonObject = json_decode($JsonString); // as stdClass
 		if (\json_last_error() != \JSON_ERROR_NONE) {
@@ -418,7 +441,7 @@ class UserProfileConfig {
 		$retn->inflateFrom($decodedJsonObject);
 		return $retn;
 	}
-	
+
 	/**
 	 * Convert this UserProfileConfig object into a plain PHP array.
 	 *
@@ -427,13 +450,14 @@ class UserProfileConfig {
 	 * @param bool $for_json_encode Represent empty key-value maps as \stdClass instead of plain PHP arrays
 	 * @return array
 	 */
-	public function toArray($for_json_encode = false)
+	public function toArray(bool $for_json_encode = false): array
 	{
 		$ret = [];
 		$ret["Username"] = $this->Username;
 		$ret["AccountName"] = $this->AccountName;
 		$ret["LocalTimezone"] = $this->LocalTimezone;
 		$ret["LanguageCode"] = $this->LanguageCode;
+		$ret["OrganizationID"] = $this->OrganizationID;
 		{
 			$c0 = [];
 			for($i0 = 0; $i0 < count($this->Emails); ++$i0) {
@@ -548,47 +572,52 @@ class UserProfileConfig {
 		$ret["RequirePasswordChange"] = $this->RequirePasswordChange;
 		$ret["CreateTime"] = $this->CreateTime;
 		$ret["CreationGUID"] = $this->CreationGUID;
-		
+		if ( $this->ServerConfig === null ) {
+			$ret["ServerConfig"] = $for_json_encode ? (object)[] : [];
+		} else {
+			$ret["ServerConfig"] = $this->ServerConfig->toArray($for_json_encode);
+		}
+
 		// Reinstate unknown properties from future server versions
 		foreach($this->__unknown_properties as $k => $v) {
 			$ret[$k] = $v;
 		}
-		
+
 		return $ret;
 	}
-	
+
 	/**
 	 * Convert this object to a JSON string.
 	 * The result is suitable to submit to the Comet Server API.
 	 *
 	 * @return string
 	 */
-	public function toJSON()
+	public function toJSON(): string
 	{
 		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
-			return json_encode($arr);
+			return json_encode($arr, JSON_UNESCAPED_SLASHES);
 		}
 	}
-	
+
 	/**
 	 * Convert this object to a PHP \stdClass.
 	 * This may be a more convenient format for working with unknown class properties.
 	 *
 	 * @return \stdClass
 	 */
-	public function toStdClass()
+	public function toStdClass(): \stdClass
 	{
 		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {
-			return json_decode(json_encode($arr));
+			return json_decode(json_encode($arr, JSON_UNESCAPED_SLASHES));
 		}
 	}
-	
+
 	/**
 	 * Erase any preserved object properties that are unknown to this Comet Server SDK.
 	 *
@@ -600,7 +629,10 @@ class UserProfileConfig {
 		if ($this->Policy !== null) {
 			$this->Policy->RemoveUnknownProperties();
 		}
+		if ($this->ServerConfig !== null) {
+			$this->ServerConfig->RemoveUnknownProperties();
+		}
 	}
-	
+
 }
 

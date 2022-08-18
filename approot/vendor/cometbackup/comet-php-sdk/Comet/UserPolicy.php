@@ -1,176 +1,186 @@
 <?php
 
 /**
- * Copyright (c) 2018-2020 Comet Licensing Ltd.
+ * Copyright (c) 2018-2022 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
- * 
+ *
  * SPDX-License-Identifier: MIT
  */
 
 namespace Comet;
 
 class UserPolicy {
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $PreventRequestStorageVault = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $PreventAddCustomStorageVault = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $PreventEditStorageVault = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $HideCloudStorageBranding = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $PreventDeleteStorageVault = false;
-	
+
 	/**
 	 * @var \Comet\StorageVaultProviderPolicy
 	 */
 	public $StorageVaultProviders = null;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $PreventNewProtectedItem = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $PreventEditProtectedItem = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $PreventDeleteProtectedItem = false;
-	
+
 	/**
 	 * @var \Comet\ProtectedItemEngineTypePolicy
 	 */
 	public $ProtectedItemEngineTypes = null;
-	
+
 	/**
 	 * @var \Comet\ExtraFileExclusion[]
 	 */
 	public $FileAndFolderMandatoryExclusions = [];
-	
+
 	/**
 	 * @var int
 	 */
 	public $ModeScheduleSkipAlreadyRunning = 0;
-	
+
 	/**
 	 * @var int
 	 */
 	public $ModeAdminResetPassword = 0;
-	
+
 	/**
 	 * @var int
 	 */
 	public $ModeAdminViewFilenames = 0;
-	
+
 	/**
 	 * @var int
 	 */
 	public $ModeRequireUserResetPassword = 0;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $PreventDeleteSingleSnapshots = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $PreventChangeAccountPassword = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $PreventChangeEmailSettings = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $PreventChangeAccountName = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $PreventOpenAppUI = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $RequirePasswordOpenAppUI = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $HideAppImport = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $HideAppVersion = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $PreventOpenWebUI = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $PreventViewDeviceNames = false;
-	
+
 	/**
 	 * @var \Comet\DefaultEmailReportPolicy
 	 */
 	public $DefaultEmailReports = null;
-	
+
 	/**
 	 * @var \Comet\RetentionPolicy
 	 */
 	public $DefaultStorageVaultRetention = null;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $EnforceStorageVaultRetention = false;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $PreventProtectedItemRetention = false;
-	
+
 	/**
 	 * @var \Comet\SourceConfig[] An array with string keys.
 	 */
 	public $DefaultSources = [];
-	
+
 	/**
 	 * @var \Comet\BackupRuleConfig[] An array with string keys.
 	 */
 	public $DefaultSourcesBackupRules = [];
-	
+
+	/**
+	 * @var \Comet\DefaultSourceWithOSRestriction[] An array with string keys.
+	 */
+	public $DefaultSourcesWithOSRestriction = [];
+
 	/**
 	 * @var \Comet\BackupRuleConfig[] An array with string keys.
 	 */
 	public $DefaultBackupRules = [];
-	
+
+	/**
+	 * @var int
+	 */
+	public $RandomDelaySecs = 0;
+
 	/**
 	 * Preserve unknown properties when dealing with future server versions.
 	 *
@@ -178,7 +188,7 @@ class UserPolicy {
 	 * @var array
 	 */
 	private $__unknown_properties = [];
-	
+
 	/**
 	 * Replace the content of this UserPolicy object from a PHP \stdClass.
 	 * The data could be supplied from an API call after json_decode(...); or generated manually.
@@ -228,7 +238,7 @@ class UserPolicy {
 				$this->ProtectedItemEngineTypes = \Comet\ProtectedItemEngineTypePolicy::createFromStdclass($sc->ProtectedItemEngineTypes);
 			}
 		}
-		if (property_exists($sc, 'FileAndFolderMandatoryExclusions')) {
+		if (property_exists($sc, 'FileAndFolderMandatoryExclusions') && !is_null($sc->FileAndFolderMandatoryExclusions)) {
 			$val_2 = [];
 			if ($sc->FileAndFolderMandatoryExclusions !== null) {
 				for($i_2 = 0; $i_2 < count($sc->FileAndFolderMandatoryExclusions); ++$i_2) {
@@ -242,16 +252,16 @@ class UserPolicy {
 			}
 			$this->FileAndFolderMandatoryExclusions = $val_2;
 		}
-		if (property_exists($sc, 'ModeScheduleSkipAlreadyRunning')) {
+		if (property_exists($sc, 'ModeScheduleSkipAlreadyRunning') && !is_null($sc->ModeScheduleSkipAlreadyRunning)) {
 			$this->ModeScheduleSkipAlreadyRunning = (int)($sc->ModeScheduleSkipAlreadyRunning);
 		}
-		if (property_exists($sc, 'ModeAdminResetPassword')) {
+		if (property_exists($sc, 'ModeAdminResetPassword') && !is_null($sc->ModeAdminResetPassword)) {
 			$this->ModeAdminResetPassword = (int)($sc->ModeAdminResetPassword);
 		}
-		if (property_exists($sc, 'ModeAdminViewFilenames')) {
+		if (property_exists($sc, 'ModeAdminViewFilenames') && !is_null($sc->ModeAdminViewFilenames)) {
 			$this->ModeAdminViewFilenames = (int)($sc->ModeAdminViewFilenames);
 		}
-		if (property_exists($sc, 'ModeRequireUserResetPassword')) {
+		if (property_exists($sc, 'ModeRequireUserResetPassword') && !is_null($sc->ModeRequireUserResetPassword)) {
 			$this->ModeRequireUserResetPassword = (int)($sc->ModeRequireUserResetPassword);
 		}
 		if (property_exists($sc, 'PreventDeleteSingleSnapshots')) {
@@ -338,6 +348,22 @@ class UserPolicy {
 			}
 			$this->DefaultSourcesBackupRules = $val_2;
 		}
+		if (property_exists($sc, 'DefaultSourcesWithOSRestriction')) {
+			$val_2 = [];
+			if ($sc->DefaultSourcesWithOSRestriction !== null) {
+				foreach($sc->DefaultSourcesWithOSRestriction as $k_2 => $v_2) {
+					$phpk_2 = (string)($k_2);
+					if (is_array($v_2) && count($v_2) === 0) {
+					// Work around edge case in json_decode--json_encode stdClass conversion
+						$phpv_2 = \Comet\DefaultSourceWithOSRestriction::createFromStdclass(new \stdClass());
+					} else {
+						$phpv_2 = \Comet\DefaultSourceWithOSRestriction::createFromStdclass($v_2);
+					}
+					$val_2[$phpk_2] = $phpv_2;
+				}
+			}
+			$this->DefaultSourcesWithOSRestriction = $val_2;
+		}
 		if (property_exists($sc, 'DefaultBackupRules')) {
 			$val_2 = [];
 			if ($sc->DefaultBackupRules !== null) {
@@ -353,6 +379,9 @@ class UserPolicy {
 				}
 			}
 			$this->DefaultBackupRules = $val_2;
+		}
+		if (property_exists($sc, 'RandomDelaySecs') && !is_null($sc->RandomDelaySecs)) {
+			$this->RandomDelaySecs = (int)($sc->RandomDelaySecs);
 		}
 		foreach(get_object_vars($sc) as $k => $v) {
 			switch($k) {
@@ -387,27 +416,29 @@ class UserPolicy {
 			case 'PreventProtectedItemRetention':
 			case 'DefaultSources':
 			case 'DefaultSourcesBackupRules':
+			case 'DefaultSourcesWithOSRestriction':
 			case 'DefaultBackupRules':
+			case 'RandomDelaySecs':
 				break;
 			default:
 				$this->__unknown_properties[$k] = $v;
 			}
 		}
 	}
-	
+
 	/**
 	 * Coerce a stdClass into a new strongly-typed UserPolicy object.
 	 *
 	 * @param \stdClass $sc Object data as stdClass
 	 * @return UserPolicy
 	 */
-	public static function createFromStdclass(\stdClass $sc)
+	public static function createFromStdclass(\stdClass $sc): \Comet\UserPolicy
 	{
 		$retn = new UserPolicy();
 		$retn->inflateFrom($sc);
 		return $retn;
 	}
-	
+
 	/**
 	 * Coerce a plain PHP array into a new strongly-typed UserPolicy object.
 	 * Because the Comet Server requires strict distinction between empty objects ({}) and arrays ([]),
@@ -416,38 +447,22 @@ class UserPolicy {
 	 * @param array $arr Object data as PHP array
 	 * @return UserPolicy
 	 */
-	public static function createFromArray(array $arr)
+	public static function createFromArray(array $arr): \Comet\UserPolicy
 	{
-		$stdClass = json_decode(json_encode($arr));
+		$stdClass = json_decode(json_encode($arr, JSON_UNESCAPED_SLASHES));
 		if (is_array($stdClass) && count($stdClass) === 0) {
 			$stdClass = new \stdClass();
 		}
 		return self::createFromStdclass($stdClass);
 	}
-	
-	/**
-	 * Coerce a plain PHP array into a new strongly-typed UserPolicy object.
-	 * Because the Comet Server requires strict distinction between empty objects ({}) and arrays ([]),
-	 * the result of this method may not be safe to re-submit to the Comet Server.
-	 *
-	 * @deprecated 3.0.0 Unsafe for round-trip server traversal. You should either 
-	 *             (A) acknowledge this and continue by switching to createFromArray, or
-	 *             (b) switch to the roundtrip-safe createFromStdclass alternative.
-	 * @param array $arr Object data as PHP array
-	 * @return UserPolicy
-	 */
-	public static function createFrom(array $arr)
-	{
-		return self::createFromArray($arr);
-	}
-	
+
 	/**
 	 * Coerce a JSON string into a new strongly-typed UserPolicy object.
 	 *
 	 * @param string $JsonString Object data as JSON string
 	 * @return UserPolicy
 	 */
-	public static function createFromJSON($JsonString)
+	public static function createFromJSON(string $JsonString): \Comet\UserPolicy
 	{
 		$decodedJsonObject = json_decode($JsonString); // as stdClass
 		if (\json_last_error() != \JSON_ERROR_NONE) {
@@ -457,7 +472,7 @@ class UserPolicy {
 		$retn->inflateFrom($decodedJsonObject);
 		return $retn;
 	}
-	
+
 	/**
 	 * Convert this UserPolicy object into a plain PHP array.
 	 *
@@ -466,7 +481,7 @@ class UserPolicy {
 	 * @param bool $for_json_encode Represent empty key-value maps as \stdClass instead of plain PHP arrays
 	 * @return array
 	 */
-	public function toArray($for_json_encode = false)
+	public function toArray(bool $for_json_encode = false): array
 	{
 		$ret = [];
 		$ret["PreventRequestStorageVault"] = $this->PreventRequestStorageVault;
@@ -561,6 +576,23 @@ class UserPolicy {
 		}
 		{
 			$c0 = [];
+			foreach($this->DefaultSourcesWithOSRestriction as $k0 => $v0) {
+				$ko_0 = $k0;
+				if ( $v0 === null ) {
+					$vo_0 = $for_json_encode ? (object)[] : [];
+				} else {
+					$vo_0 = $v0->toArray($for_json_encode);
+				}
+				$c0[ $ko_0 ] = $vo_0;
+			}
+			if ($for_json_encode && count($c0) == 0) {
+				$ret["DefaultSourcesWithOSRestriction"] = (object)[];
+			} else {
+				$ret["DefaultSourcesWithOSRestriction"] = $c0;
+			}
+		}
+		{
+			$c0 = [];
 			foreach($this->DefaultBackupRules as $k0 => $v0) {
 				$ko_0 = $k0;
 				if ( $v0 === null ) {
@@ -576,47 +608,48 @@ class UserPolicy {
 				$ret["DefaultBackupRules"] = $c0;
 			}
 		}
-		
+		$ret["RandomDelaySecs"] = $this->RandomDelaySecs;
+
 		// Reinstate unknown properties from future server versions
 		foreach($this->__unknown_properties as $k => $v) {
 			$ret[$k] = $v;
 		}
-		
+
 		return $ret;
 	}
-	
+
 	/**
 	 * Convert this object to a JSON string.
 	 * The result is suitable to submit to the Comet Server API.
 	 *
 	 * @return string
 	 */
-	public function toJSON()
+	public function toJSON(): string
 	{
 		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
-			return json_encode($arr);
+			return json_encode($arr, JSON_UNESCAPED_SLASHES);
 		}
 	}
-	
+
 	/**
 	 * Convert this object to a PHP \stdClass.
 	 * This may be a more convenient format for working with unknown class properties.
 	 *
 	 * @return \stdClass
 	 */
-	public function toStdClass()
+	public function toStdClass(): \stdClass
 	{
 		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {
-			return json_decode(json_encode($arr));
+			return json_decode(json_encode($arr, JSON_UNESCAPED_SLASHES));
 		}
 	}
-	
+
 	/**
 	 * Erase any preserved object properties that are unknown to this Comet Server SDK.
 	 *
@@ -638,6 +671,6 @@ class UserPolicy {
 			$this->DefaultStorageVaultRetention->RemoveUnknownProperties();
 		}
 	}
-	
+
 }
 

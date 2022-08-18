@@ -5,7 +5,7 @@
 		}
 	},
 	"require": {
-        "cometbackup/comet-php-sdk": "^3.7",
+        "cometbackup/comet-php-sdk": "^4.1",
         "ext-curl": "^7.3",
         "jimdo/prometheus_client_php": "dev-master"
     }

@@ -1,276 +1,296 @@
 <?php
 
 /**
- * Copyright (c) 2018-2020 Comet Licensing Ltd.
+ * Copyright (c) 2018-2022 Comet Licensing Ltd.
  * Please see the LICENSE file for usage information.
- * 
+ *
  * SPDX-License-Identifier: MIT
  */
 
 namespace Comet;
 
 class DestinationConfig {
-	
+
 	/**
 	 * @var string
 	 */
 	public $Description = "";
-	
+
 	/**
 	 * @var int
 	 */
 	public $CreateTime = 0;
-	
+
 	/**
 	 * @var int
 	 */
 	public $ModifyTime = 0;
-	
+
 	/**
 	 * @var string[]
 	 */
 	public $PreExec = [];
-	
+
+	/**
+	 * @var string[]
+	 */
+	public $ThawExec = [];
+
 	/**
 	 * @var string[]
 	 */
 	public $PostExec = [];
-	
+
 	/**
 	 * @var int
 	 */
 	public $DestinationType = 0;
-	
+
 	/**
 	 * @var string
 	 */
 	public $CometServer = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $CometBucket = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $CometBucketKey = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $S3Server = "";
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $S3UsesTLS = false;
-	
+
 	/**
 	 * @var string
 	 */
 	public $S3AccessKey = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $S3SecretKey = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $S3BucketName = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $S3Subdir = "";
-	
+
+	/**
+	 * @var string
+	 */
+	public $S3CustomRegion = "";
+
 	/**
 	 * @var boolean
 	 */
 	public $S3UsesV2Signing = false;
-	
+
 	/**
 	 * @var string
 	 */
 	public $SFTPServer = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $SFTPUsername = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $SFTPRemotePath = "";
-	
+
 	/**
 	 * @var int
 	 */
 	public $SFTPAuthMode = 0;
-	
+
 	/**
 	 * @var string
 	 */
 	public $SFTPPassword = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $SFTPPrivateKey = "";
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $SFTPCustomAuth_UseKnownHostsFile = false;
-	
+
 	/**
 	 * @var string
 	 */
 	public $SFTPCustomAuth_KnownHostsFile = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $FTPServer = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $FTPUsername = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $FTPPassword = "";
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $FTPBaseUseHomeDirectory = false;
-	
+
 	/**
 	 * @var string
 	 */
 	public $FTPCustomBaseDirectory = "";
-	
+
 	/**
 	 * @var int
 	 */
 	public $FTPSMode = 0;
-	
+
 	/**
 	 * @var int
 	 */
 	public $FTPPort = 0;
-	
+
 	/**
 	 * @var int
 	 */
 	public $FTPMaxConnections = 0;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $FTPAcceptInvalidSSL = false;
-	
+
 	/**
 	 * @var string
 	 */
 	public $AZBAccountName = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $AZBAccountKey = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $AZBContainer = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $AZBRealm = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $AZBPrefix = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $LocalcopyPath = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $LocalcopyWinSMBUsername = "";
-	
+
 	/**
 	 * @var string
 	 */
 	public $LocalcopyWinSMBPassword = "";
-	
+
 	/**
 	 * @var int
 	 */
 	public $LocalcopyWinSMBPasswordFormat = 0;
-	
+
 	/**
 	 * @var \Comet\SwiftDestinationLocation
 	 */
 	public $Swift = null;
-	
+
 	/**
 	 * @var \Comet\B2DestinationLocation
 	 */
 	public $B2 = null;
-	
+
 	/**
 	 * @var \Comet\DestinationLocation[]
 	 */
 	public $SpanTargets = [];
-	
+
+	/**
+	 * @var boolean
+	 */
+	public $SpanUseStaticSlots = false;
+
 	/**
 	 * @var int
 	 */
 	public $EncryptionKeyEncryptionMethod = 0;
-	
+
 	/**
 	 * @var string
 	 */
 	public $EncryptedEncryptionKey = "";
-	
+
 	/**
 	 * @var int
 	 */
 	public $RepoInitTimestamp = 0;
-	
+
 	/**
 	 * @var boolean
 	 */
 	public $StorageLimitEnabled = false;
-	
+
 	/**
 	 * @var int
 	 */
 	public $StorageLimitBytes = 0;
-	
+
 	/**
 	 * @var \Comet\DestinationStatistics
 	 */
 	public $Statistics = null;
-	
+
 	/**
 	 * @var \Comet\RetentionPolicy
 	 */
 	public $DefaultRetention = null;
-	
+
+	/**
+	 * @var boolean
+	 */
+	public $RebrandStorage = false;
+
 	/**
 	 * Preserve unknown properties when dealing with future server versions.
 	 *
@@ -278,7 +298,7 @@ class DestinationConfig {
 	 * @var array
 	 */
 	private $__unknown_properties = [];
-	
+
 	/**
 	 * Replace the content of this DestinationConfig object from a PHP \stdClass.
 	 * The data could be supplied from an API call after json_decode(...); or generated manually.
@@ -305,6 +325,15 @@ class DestinationConfig {
 				}
 			}
 			$this->PreExec = $val_2;
+		}
+		if (property_exists($sc, 'ThawExec')) {
+			$val_2 = [];
+			if ($sc->ThawExec !== null) {
+				for($i_2 = 0; $i_2 < count($sc->ThawExec); ++$i_2) {
+					$val_2[] = (string)($sc->ThawExec[$i_2]);
+				}
+			}
+			$this->ThawExec = $val_2;
 		}
 		if (property_exists($sc, 'PostExec')) {
 			$val_2 = [];
@@ -344,6 +373,9 @@ class DestinationConfig {
 		}
 		if (property_exists($sc, 'S3Subdir')) {
 			$this->S3Subdir = (string)($sc->S3Subdir);
+		}
+		if (property_exists($sc, 'S3CustomRegion')) {
+			$this->S3CustomRegion = (string)($sc->S3CustomRegion);
 		}
 		if (property_exists($sc, 'S3UsesV2Signing')) {
 			$this->S3UsesV2Signing = (bool)($sc->S3UsesV2Signing);
@@ -456,6 +488,9 @@ class DestinationConfig {
 			}
 			$this->SpanTargets = $val_2;
 		}
+		if (property_exists($sc, 'SpanUseStaticSlots')) {
+			$this->SpanUseStaticSlots = (bool)($sc->SpanUseStaticSlots);
+		}
 		if (property_exists($sc, 'EncryptionKeyEncryptionMethod')) {
 			$this->EncryptionKeyEncryptionMethod = (int)($sc->EncryptionKeyEncryptionMethod);
 		}
@@ -471,7 +506,7 @@ class DestinationConfig {
 		if (property_exists($sc, 'StorageLimitBytes')) {
 			$this->StorageLimitBytes = (int)($sc->StorageLimitBytes);
 		}
-		if (property_exists($sc, 'Statistics')) {
+		if (property_exists($sc, 'Statistics') && !is_null($sc->Statistics)) {
 			if (is_array($sc->Statistics) && count($sc->Statistics) === 0) {
 			// Work around edge case in json_decode--json_encode stdClass conversion
 				$this->Statistics = \Comet\DestinationStatistics::createFromStdclass(new \stdClass());
@@ -487,12 +522,16 @@ class DestinationConfig {
 				$this->DefaultRetention = \Comet\RetentionPolicy::createFromStdclass($sc->DefaultRetention);
 			}
 		}
+		if (property_exists($sc, 'RebrandStorage')) {
+			$this->RebrandStorage = (bool)($sc->RebrandStorage);
+		}
 		foreach(get_object_vars($sc) as $k => $v) {
 			switch($k) {
 			case 'Description':
 			case 'CreateTime':
 			case 'ModifyTime':
 			case 'PreExec':
+			case 'ThawExec':
 			case 'PostExec':
 			case 'DestinationType':
 			case 'CometServer':
@@ -504,6 +543,7 @@ class DestinationConfig {
 			case 'S3SecretKey':
 			case 'S3BucketName':
 			case 'S3Subdir':
+			case 'S3CustomRegion':
 			case 'S3UsesV2Signing':
 			case 'SFTPServer':
 			case 'SFTPUsername':
@@ -534,6 +574,7 @@ class DestinationConfig {
 			case 'Swift':
 			case 'B2':
 			case 'SpanTargets':
+			case 'SpanUseStaticSlots':
 			case 'EncryptionKeyEncryptionMethod':
 			case 'EncryptedEncryptionKey':
 			case 'RepoInitTimestamp':
@@ -541,26 +582,27 @@ class DestinationConfig {
 			case 'StorageLimitBytes':
 			case 'Statistics':
 			case 'DefaultRetention':
+			case 'RebrandStorage':
 				break;
 			default:
 				$this->__unknown_properties[$k] = $v;
 			}
 		}
 	}
-	
+
 	/**
 	 * Coerce a stdClass into a new strongly-typed DestinationConfig object.
 	 *
 	 * @param \stdClass $sc Object data as stdClass
 	 * @return DestinationConfig
 	 */
-	public static function createFromStdclass(\stdClass $sc)
+	public static function createFromStdclass(\stdClass $sc): \Comet\DestinationConfig
 	{
 		$retn = new DestinationConfig();
 		$retn->inflateFrom($sc);
 		return $retn;
 	}
-	
+
 	/**
 	 * Coerce a plain PHP array into a new strongly-typed DestinationConfig object.
 	 * Because the Comet Server requires strict distinction between empty objects ({}) and arrays ([]),
@@ -569,38 +611,22 @@ class DestinationConfig {
 	 * @param array $arr Object data as PHP array
 	 * @return DestinationConfig
 	 */
-	public static function createFromArray(array $arr)
+	public static function createFromArray(array $arr): \Comet\DestinationConfig
 	{
-		$stdClass = json_decode(json_encode($arr));
+		$stdClass = json_decode(json_encode($arr, JSON_UNESCAPED_SLASHES));
 		if (is_array($stdClass) && count($stdClass) === 0) {
 			$stdClass = new \stdClass();
 		}
 		return self::createFromStdclass($stdClass);
 	}
-	
-	/**
-	 * Coerce a plain PHP array into a new strongly-typed DestinationConfig object.
-	 * Because the Comet Server requires strict distinction between empty objects ({}) and arrays ([]),
-	 * the result of this method may not be safe to re-submit to the Comet Server.
-	 *
-	 * @deprecated 3.0.0 Unsafe for round-trip server traversal. You should either 
-	 *             (A) acknowledge this and continue by switching to createFromArray, or
-	 *             (b) switch to the roundtrip-safe createFromStdclass alternative.
-	 * @param array $arr Object data as PHP array
-	 * @return DestinationConfig
-	 */
-	public static function createFrom(array $arr)
-	{
-		return self::createFromArray($arr);
-	}
-	
+
 	/**
 	 * Coerce a JSON string into a new strongly-typed DestinationConfig object.
 	 *
 	 * @param string $JsonString Object data as JSON string
 	 * @return DestinationConfig
 	 */
-	public static function createFromJSON($JsonString)
+	public static function createFromJSON(string $JsonString): \Comet\DestinationConfig
 	{
 		$decodedJsonObject = json_decode($JsonString); // as stdClass
 		if (\json_last_error() != \JSON_ERROR_NONE) {
@@ -610,7 +636,7 @@ class DestinationConfig {
 		$retn->inflateFrom($decodedJsonObject);
 		return $retn;
 	}
-	
+
 	/**
 	 * Convert this DestinationConfig object into a plain PHP array.
 	 *
@@ -619,7 +645,7 @@ class DestinationConfig {
 	 * @param bool $for_json_encode Represent empty key-value maps as \stdClass instead of plain PHP arrays
 	 * @return array
 	 */
-	public function toArray($for_json_encode = false)
+	public function toArray(bool $for_json_encode = false): array
 	{
 		$ret = [];
 		$ret["Description"] = $this->Description;
@@ -632,6 +658,14 @@ class DestinationConfig {
 				$c0[] = $val0;
 			}
 			$ret["PreExec"] = $c0;
+		}
+		{
+			$c0 = [];
+			for($i0 = 0; $i0 < count($this->ThawExec); ++$i0) {
+				$val0 = $this->ThawExec[$i0];
+				$c0[] = $val0;
+			}
+			$ret["ThawExec"] = $c0;
 		}
 		{
 			$c0 = [];
@@ -651,6 +685,7 @@ class DestinationConfig {
 		$ret["S3SecretKey"] = $this->S3SecretKey;
 		$ret["S3BucketName"] = $this->S3BucketName;
 		$ret["S3Subdir"] = $this->S3Subdir;
+		$ret["S3CustomRegion"] = $this->S3CustomRegion;
 		$ret["S3UsesV2Signing"] = $this->S3UsesV2Signing;
 		$ret["SFTPServer"] = $this->SFTPServer;
 		$ret["SFTPUsername"] = $this->SFTPUsername;
@@ -700,6 +735,7 @@ class DestinationConfig {
 			}
 			$ret["SpanTargets"] = $c0;
 		}
+		$ret["SpanUseStaticSlots"] = $this->SpanUseStaticSlots;
 		$ret["EncryptionKeyEncryptionMethod"] = $this->EncryptionKeyEncryptionMethod;
 		$ret["EncryptedEncryptionKey"] = $this->EncryptedEncryptionKey;
 		$ret["RepoInitTimestamp"] = $this->RepoInitTimestamp;
@@ -715,47 +751,48 @@ class DestinationConfig {
 		} else {
 			$ret["DefaultRetention"] = $this->DefaultRetention->toArray($for_json_encode);
 		}
-		
+		$ret["RebrandStorage"] = $this->RebrandStorage;
+
 		// Reinstate unknown properties from future server versions
 		foreach($this->__unknown_properties as $k => $v) {
 			$ret[$k] = $v;
 		}
-		
+
 		return $ret;
 	}
-	
+
 	/**
 	 * Convert this object to a JSON string.
 	 * The result is suitable to submit to the Comet Server API.
 	 *
 	 * @return string
 	 */
-	public function toJSON()
+	public function toJSON(): string
 	{
 		$arr = $this->toArray(true);
 		if (count($arr) === 0) {
 			return "{}"; // object
 		} else {
-			return json_encode($arr);
+			return json_encode($arr, JSON_UNESCAPED_SLASHES);
 		}
 	}
-	
+
 	/**
 	 * Convert this object to a PHP \stdClass.
 	 * This may be a more convenient format for working with unknown class properties.
 	 *
 	 * @return \stdClass
 	 */
-	public function toStdClass()
+	public function toStdClass(): \stdClass
 	{
 		$arr = $this->toArray(false);
 		if (count($arr) === 0) {
 			return new \stdClass();
 		} else {
-			return json_decode(json_encode($arr));
+			return json_decode(json_encode($arr, JSON_UNESCAPED_SLASHES));
 		}
 	}
-	
+
 	/**
 	 * Erase any preserved object properties that are unknown to this Comet Server SDK.
 	 *
@@ -777,6 +814,6 @@ class DestinationConfig {
 			$this->DefaultRetention->RemoveUnknownProperties();
 		}
 	}
-	
+
 }
 
