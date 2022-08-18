@@ -59,6 +59,9 @@ class CometPrometheusExporter {
                 $online_devices = $this->cs->AdminDispatcherListActive();
                 $recentjobs = $this->cs->AdminGetJobsForDateRange(time() - 86400, time()); // Jobs with a runtime intersecting the last 24 hours
             }
+            if ($serverinfo->StorageRole) {
+                $storagerole_buckets = $this->cs->AdminStorageListBuckets();
+            }
         }
         $api_requests_end_time = microtime(true);
 
@@ -72,6 +75,9 @@ class CometPrometheusExporter {
             $this->addRecentJobsMetrics($recentjobs);
             $this->addOnlineStatusMetrics($users, $online_devices);
             $this->addDeviceIsCurrentMetrics($users, $online_devices, $serverinfo);
+        }
+        if ($serverinfo->StorageRole) {
+            $this->addTotalSRBucketsMetric($storagerole_buckets);
         }
         
         // Render result
@@ -112,6 +118,23 @@ class CometPrometheusExporter {
             'The total number of users on this Comet Server'
         );
         $users_total_gauge->set(count($users));
+    }
+
+    /**
+     * Register metric
+     * Total number of Storage Role buckets on the server
+     *
+     * @param \Comet\BucketProperties[] $storagerole_buckets Result of AdminListUsersFull API call
+     * @return void
+     */
+    public function addTotalSRBucketsMetric(array $storagerole_buckets): void { 
+
+        $storagerole_buckets_total_gauge = $this->registry->registerGauge(
+            'cometserver',
+            'storagerole_buckets_total',
+            'The total number of Storage Role buckets on this Comet Server'
+        );
+        $storagerole_buckets_total_gauge->set(count($storagerole_buckets));
     }
 
     /**
